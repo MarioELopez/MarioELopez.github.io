@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mario E. López C.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:         #0a0a0f;
+      --surface:    #13131a;
+      --surface2:   #1c1c27;
+      --border:     #2a2a3a;
+      --accent:     #6c63ff;
+      --accent2:    #a78bfa;
+      --text:       #e8e8f0;
+      --text-muted: #8888aa;
+      --glow:       rgba(108, 99, 255, 0.15);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      background-image:
+        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(108,99,255,0.12), transparent),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(167,139,250,0.06), transparent);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    /* ── PROFILE ── */
+    .profile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      text-align: center;
+    }
+
+    .avatar {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 700;
+      color: white;
+      box-shadow: 0 0 0 3px var(--surface2), 0 0 0 5px var(--border), 0 8px 32px var(--glow);
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    .profile h1 {
+      font-size: clamp(1.2rem, 4vw, 1.5rem);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .tagline {
+      font-size: clamp(0.8rem, 3vw, 0.9rem);
+      color: var(--text-muted);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.3rem 0.85rem;
+      font-size: 0.75rem;
+      color: var(--accent2);
+      font-weight: 500;
+    }
+
+    /* ── STREAK ── */
+    .streak-card {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.85rem 1.1rem;
+      background: linear-gradient(135deg, rgba(255,136,0,0.08), rgba(255,80,0,0.05));
+      border: 1px solid rgba(255,136,0,0.25);
+      border-radius: 14px;
+    }
+
+    .streak-fire {
+      font-size: 2rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .streak-info { flex: 1; }
+
+    .streak-days {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #ff8800;
+      line-height: 1;
+    }
+
+    .streak-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+
+    .streak-duo {
+      font-size: 0.7rem;
+      color: #58cc02;
+      font-weight: 600;
+      background: rgba(88,204,2,0.1);
+      border: 1px solid rgba(88,204,2,0.2);
+      border-radius: 999px;
+      padding: 0.2rem 0.6rem;
+    }
+
+    /* ── LINKS ── */
+    .links {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .section-label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      padding: 0 0.25rem;
+      margin-top: 0.4rem;
+    }
+
+    .link-card {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      padding: 0.85rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      text-decoration: none;
+      color: var(--text);
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .link-card:hover, .link-card:focus {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+      box-shadow: 0 4px 24px var(--glow);
+      outline: none;
+    }
+
+    .link-card:active { transform: translateY(0); }
+
+    .link-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .link-icon svg { width: 21px; height: 21px; }
+
+    .link-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.08rem;
+      min-width: 0;
+    }
+
+    .link-name {
+      font-weight: 500;
+      font-size: clamp(0.82rem, 3vw, 0.9rem);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .link-handle {
+      font-size: clamp(0.7rem, 2.5vw, 0.75rem);
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .link-arrow {
+      color: var(--text-muted);
+      opacity: 0.4;
+      transition: opacity 0.18s, transform 0.18s;
+      flex-shrink: 0;
+    }
+
+    .link-card:hover .link-arrow { opacity: 1; transform: translateX(3px); }
+
+    /* ── ICON COLORS ── */
+    .ig  { background: linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045); }
+    .tt  { background: #010101; border: 1px solid #333; }
+    .fb  { background: #1877f2; }
+    .dc  { background: #5865f2; }
+    .sp  { background: #1db954; }
+    .duo { background: #58cc02; }
+    .li  { background: #0a66c2; }
+    .gh  { background: #24292e; border: 1px solid #444; }
+    .cv  { background: linear-gradient(135deg, var(--accent), var(--accent2)); }
+    .strava { background: #fc4c02; }
+
+    /* ── FOOTER ── */
+    .footer {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      opacity: 0.45;
+      text-align: center;
+      padding-bottom: 0.5rem;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 400px) {
+      body { padding: 1.5rem 0.75rem; }
+      .avatar { width: 78px; height: 78px; font-size: 1.7rem; }
+      .link-card { padding: 0.75rem 0.85rem; }
+      .link-icon { width: 36px; height: 36px; border-radius: 8px; }
+    }
+
+    @media (min-width: 768px) {
+      .container { max-width: 560px; }
+      .link-card { padding: 1rem 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="container" id="app">
+  <!-- Generado por JavaScript desde config.js -->
+</div>
+
+<script src="config.js"></script>
+<script>
+
+// ── ICONOS SVG ────────────────────────────────────────────
+const ICONOS = {
+  ig:  `<svg viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>`,
+  tt:  `<svg viewBox="0 0 24 24" fill="white"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.75a4.85 4.85 0 01-1.01-.06z"/></svg>`,
+  fb:  `<svg viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>`,
+  dc:  `<svg viewBox="0 0 24 24" fill="white"><path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>`,
+  sp:  `<svg viewBox="0 0 24 24" fill="white"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>`,
+  duo: `<svg viewBox="0 0 24 24" fill="white"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm-.08 4.242c1.81 0 3.307.58 4.49 1.742 1.183 1.162 1.774 2.626 1.774 4.393 0 1.226-.29 2.32-.871 3.283-.58.962-1.408 1.718-2.483 2.27l3.27 4.828h-3.6l-2.77-4.27h-1.31v4.27H7.507V4.242h4.413zm-.161 2.681H10.51v4.867h1.249c.881 0 1.56-.232 2.038-.695.478-.463.717-1.1.717-1.91 0-.787-.232-1.403-.695-1.848-.463-.443-1.116-.414-2.06-.414z"/></svg>`,
+  li:  `<svg viewBox="0 0 24 24" fill="white"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>`,
+  gh:  `<svg viewBox="0 0 24 24" fill="white"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>`,
+  cv:  `<svg viewBox="0 0 24 24" fill="white"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm4 18H6V4h7v5h5v11zM8 15h8v2H8v-2zm0-4h8v2H8v-2zm0-4h5v2H8V7z"/></svg>`,
+  strava: `<svg viewBox="0 0 24 24" fill="white"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/></svg>`
+};
+
+const ARROW = `<svg class="link-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`;
+
+// ── CONSTRUIR PÁGINA ──────────────────────────────────────
+function buildPage() {
+  const app = document.getElementById('app');
+
+  // Perfil
+  app.innerHTML = `
+    <div class="profile">
+      <div class="avatar">${CONFIG.iniciales}</div>
+      <h1>${CONFIG.nombre}</h1>
+      <p class="tagline">${CONFIG.tagline}</p>
+      <span class="badge">
+        <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>
+        ${CONFIG.badge}
+      </span>
+    </div>
+
+    <div class="streak-card">
+      <div class="streak-fire">🔥</div>
+      <div class="streak-info">
+        <div class="streak-days">${CONFIG.duolingoStreak} días</div>
+        <div class="streak-label">Racha en Duolingo · ${CONFIG.duolingoIdioma}</div>
+      </div>
+      <span class="streak-duo">activa</span>
+    </div>
+
+    <div class="links" id="links-container"></div>
+
+    <p class="footer">© ${new Date().getFullYear()} ${CONFIG.footer}</p>
+  `;
+
+  // Links agrupados por sección
+  const container = document.getElementById('links-container');
+  const secciones = ['social', 'profesional'];
+  const labels    = { social: 'Redes Sociales', profesional: 'Profesional' };
+
+  secciones.forEach(seccion => {
+    const items = CONFIG.links.filter(l => l.seccion === seccion);
+    if (!items.length) return;
+
+    const label = document.createElement('p');
+    label.className = 'section-label';
+    label.textContent = labels[seccion];
+    container.appendChild(label);
+
+    items.forEach(link => {
+      const a = document.createElement('a');
+      a.className = 'link-card';
+      a.href = link.url;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.innerHTML = `
+        <div class="link-icon ${link.icono}">${ICONOS[link.icono] || ''}</div>
+        <div class="link-info">
+          <span class="link-name">${link.nombre}</span>
+          <span class="link-handle">${link.handle}</span>
+        </div>
+        ${ARROW}
+      `;
+      container.appendChild(a);
+    });
+  });
+}
+
+buildPage();
+</script>
+</body>
+</html>
