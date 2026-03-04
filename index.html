@@ -325,25 +325,42 @@ function buildPage() {
     container.appendChild(label);
 
     items.forEach(link => {
+      // CV necesita estructura especial para evitar <a> dentro de <a>
+      if (link.id === 'cv' && link.urlDescarga) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'link-card';
+        wrapper.style.cursor = 'pointer';
+        wrapper.addEventListener('click', () => window.open(link.url, '_blank'));
+
+        wrapper.innerHTML = `
+          <div class="link-icon ${link.icono}">${ICONOS[link.icono] || ''}</div>
+          <div class="link-info">
+            <span class="link-name">${link.nombre}</span>
+            <span class="link-handle">${link.handle}</span>
+          </div>
+          <a class="download-btn" href="${link.urlDescarga}" download
+             target="_blank" onclick="event.stopPropagation()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            PDF
+          </a>
+        `;
+        container.appendChild(wrapper);
+        return;
+      }
+
       const a = document.createElement('a');
       a.className = 'link-card';
       a.href = link.url;
       a.target = '_blank';
       a.rel = 'noopener';
-      // Botón derecho: streak para Duolingo, descarga para CV, flecha para el resto
+
       let rightHTML;
       if (link.id === 'duolingo') {
         rightHTML = `<span class="streak-badge">🔥 ${CONFIG.duolingoStreak}</span>`;
-      } else if (link.id === 'cv' && link.urlDescarga) {
-        rightHTML = `<a class="download-btn" href="${link.urlDescarga}" download
-             onclick="event.stopPropagation()">
-             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-               <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-               <polyline points="7 10 12 15 17 10"/>
-               <line x1="12" y1="15" x2="12" y2="3"/>
-             </svg>
-             PDF
-           </a>`;
       } else {
         rightHTML = ARROW;
       }
