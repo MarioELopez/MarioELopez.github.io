@@ -84,7 +84,7 @@ const CONFIG = {
       id:      "strava",
       nombre:  "Strava",
       handle:  "🚴 Cargando stats...",
-      url:     "https://www.strava.com/athletes/mario_e_lopez",
+      url:     "https://www.strava.com/athletes/95307903",
       icono:   "strava",
       seccion: "social"
     },
