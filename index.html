@@ -23,6 +23,22 @@
 
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
+    /* ── ANIMACIONES ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes countUp {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .fade-up {
+      opacity: 0;
+      animation: fadeUp 0.5s ease forwards;
+    }
+
     body {
       background: var(--bg);
       color: var(--text);
@@ -81,6 +97,13 @@
     .tagline {
       font-size: clamp(0.8rem, 3vw, 0.9rem);
       color: var(--text-muted);
+    }
+
+    .descripcion {
+      font-size: clamp(0.72rem, 2.5vw, 0.78rem);
+      color: var(--text-muted);
+      opacity: 0.7;
+      letter-spacing: 0.01em;
     }
 
     .badge {
@@ -328,10 +351,11 @@ function buildPage() {
   // Perfil
   app.innerHTML = `
     <div class="profile">
-      <div class="avatar"><img src="FOTO_PERFIL.jpg" alt="Mario E. López C."></div>
-      <h1>${CONFIG.nombre}</h1>
-      <p class="tagline">${CONFIG.tagline}</p>
-      <span class="badge">
+      <div class="avatar fade-up" style="animation-delay: 0.05s"><img src="FOTO_PERFIL.jpg" alt="Mario E. López C."></div>
+      <h1 class="fade-up" style="animation-delay: 0.15s">${CONFIG.nombre}</h1>
+      <p class="tagline fade-up" style="animation-delay: 0.22s">${CONFIG.tagline}</p>
+      <p class="descripcion fade-up" style="animation-delay: 0.28s">${CONFIG.descripcion}</p>
+      <span class="badge fade-up" style="animation-delay: 0.35s">
         <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>
         ${CONFIG.badge}
       </span>
@@ -356,11 +380,13 @@ function buildPage() {
     label.textContent = labels[seccion];
     container.appendChild(label);
 
-    items.forEach(link => {
+    items.forEach((link, index) => {
+      const delay = 0.45 + (index * 0.07);
       // Discord: div con botón de copiar usuario
       if (link.id === 'discord' && link.discordUser) {
         const wrapper = document.createElement('div');
-        wrapper.className = 'link-card';
+        wrapper.className = 'link-card fade-up';
+        wrapper.style.animationDelay = delay + 's';
         wrapper.style.cursor = 'default';
         wrapper.innerHTML = `
           <div class="link-icon ${link.icono}">${ICONOS[link.icono] || ''}</div>
@@ -373,7 +399,7 @@ function buildPage() {
               <rect x="9" y="9" width="13" height="13" rx="2"/>
               <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
             </svg>
-            <span>COPY</span>
+            <span>COPIAR</span>
           </button>
         `;
         container.appendChild(wrapper);
@@ -386,7 +412,7 @@ function buildPage() {
             span.textContent = '\u2713 Copiado';
             setTimeout(() => {
               btn.classList.remove('copied');
-              span.textContent = 'Copiar';
+              span.textContent = 'COPIAR';
             }, 2000);
           });
         });
@@ -396,7 +422,8 @@ function buildPage() {
       // CV necesita estructura especial para evitar <a> dentro de <a>
       if (link.id === 'cv' && link.urlDescarga) {
         const wrapper = document.createElement('div');
-        wrapper.className = 'link-card';
+        wrapper.className = 'link-card fade-up';
+        wrapper.style.animationDelay = delay + 's';
         wrapper.style.cursor = 'pointer';
         wrapper.addEventListener('click', () => window.open(link.url, '_blank'));
 
@@ -421,14 +448,15 @@ function buildPage() {
       }
 
       const a = document.createElement('a');
-      a.className = 'link-card';
+      a.className = 'link-card fade-up';
+      a.style.animationDelay = delay + 's';
       a.href = link.url;
       a.target = '_blank';
       a.rel = 'noopener';
 
       let rightHTML;
       if (link.id === 'duolingo') {
-        rightHTML = `<span class="streak-badge">🔥 ${CONFIG.duolingoStreak}</span>`;
+        rightHTML = `<span class="streak-badge">🔥 <span class="streak-num">0</span></span>`;
       } else {
         rightHTML = ARROW;
       }
@@ -447,6 +475,27 @@ function buildPage() {
 }
 
 buildPage();
+
+// ── CONTADOR ANIMADO DUOLINGO ──
+function animateStreak() {
+  const el = document.querySelector('.streak-num');
+  if (!el) return;
+  const target = CONFIG.duolingoStreak;
+  const duration = 1200;
+  const start = performance.now();
+  function update(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    // Easing out cubic
+    const ease = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.floor(ease * target);
+    if (progress < 1) requestAnimationFrame(update);
+    else el.textContent = target;
+  }
+  // Esperar a que el botón de Duolingo haya aparecido
+  setTimeout(() => requestAnimationFrame(update), 900);
+}
+animateStreak();
 </script>
 </body>
 </html>
