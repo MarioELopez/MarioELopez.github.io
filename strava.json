@@ -1,10 +1,16 @@
 {
-  "actualizado": "",
-  "km_anio": 0,
-  "km_alltime": 0,
-  "pr_distancia": 0,
-  "pr_velocidad": 0,
-  "ultima": {},
-  "modo": "anual",
-  "display": "Cargando..."
+  "actualizado": "2026-03-04T06:08:26.423680+00:00",
+  "km_anio": 0.0,
+  "km_alltime": 1858.9,
+  "pr_distancia": 66.5,
+  "pr_velocidad": 23.5,
+  "ultima": {
+    "nombre": "ENFRIAMIENTO ELECTORAL",
+    "distancia": 11.9,
+    "tiempo": 2542,
+    "fecha": "2025-08-17",
+    "velocidad": 16.9
+  },
+  "modo": "pr",
+  "display": "🏆 66.5 km · ⚡ 23.5 km/h"
 }
