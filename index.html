@@ -227,6 +227,37 @@
 
     .download-btn svg { flex-shrink: 0; }
 
+    /* ── DISCORD COPY ── */
+    .copy-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+      padding: 0.4rem 0.6rem;
+      background: rgba(88,101,242,0.1);
+      border: 1px solid rgba(88,101,242,0.25);
+      border-radius: 8px;
+      color: #a0a8f8;
+      font-size: 0.72rem;
+      font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: background 0.18s, border-color 0.18s;
+      position: relative;
+    }
+
+    .copy-btn:hover {
+      background: rgba(88,101,242,0.2);
+      border-color: #5865f2;
+    }
+
+    .copy-btn.copied {
+      background: rgba(59,195,120,0.15);
+      border-color: rgba(59,195,120,0.4);
+      color: #3bc378;
+    }
+
     /* ── ICON COLORS ── */
     .ig  { background: linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045); }
     .tt  { background: #010101; border: 1px solid #333; }
@@ -325,6 +356,42 @@ function buildPage() {
     container.appendChild(label);
 
     items.forEach(link => {
+      // Discord: div con botón de copiar usuario
+      if (link.id === 'discord' && link.discordUser) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'link-card';
+        wrapper.style.cursor = 'default';
+        wrapper.innerHTML = `
+          <div class="link-icon ${link.icono}">${ICONOS[link.icono] || ''}</div>
+          <div class="link-info">
+            <span class="link-name">${link.nombre}</span>
+            <span class="link-handle">${link.handle}</span>
+          </div>
+          <button class="copy-btn" id="discord-copy-btn">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <rect x="9" y="9" width="13" height="13" rx="2"/>
+              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+            </svg>
+            <span>Copiar</span>
+          </button>
+        `;
+        container.appendChild(wrapper);
+
+        const btn = wrapper.querySelector('#discord-copy-btn');
+        const span = btn.querySelector('span');
+        btn.addEventListener('click', () => {
+          navigator.clipboard.writeText(link.discordUser).then(() => {
+            btn.classList.add('copied');
+            span.textContent = '\u2713 Copiado';
+            setTimeout(() => {
+              btn.classList.remove('copied');
+              span.textContent = 'Copiar';
+            }, 2000);
+          });
+        });
+        return;
+      }
+
       // CV necesita estructura especial para evitar <a> dentro de <a>
       if (link.id === 'cv' && link.urlDescarga) {
         const wrapper = document.createElement('div');
