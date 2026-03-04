@@ -85,7 +85,8 @@ const CONFIG = {
       id:      "cv",
       nombre:  "Currículum Vitae",
       handle:  "Ing. Industrial · UAGRM",
-      url:     "./cv.pdf",
+      url:     "https://www.canva.com/design/DAHAlzexkmM/gzhliwIQDsy30xh4PfHfjw/view?utm_content=DAHAlzexkmM&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hd70d46c15b",
+      urlDescarga: "./CV - MARIO GIT.pdf",
       icono:   "cv",
       seccion: "profesional"
     }

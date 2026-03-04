@@ -16,7 +16,9 @@
       --accent2:    #a78bfa;
       --text:       #e8e8f0;
       --text-muted: #8888aa;
-      --glow:       rgba(108, 99, 255, 0.15);
+      --glow:       rgba(108, 99, 255, 0.12);
+      --orange:     #d4682a;
+      --orange2:    #e8924d;
     }
 
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -31,8 +33,8 @@
       justify-content: center;
       padding: 2rem 1rem;
       background-image:
-        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(108,99,255,0.12), transparent),
-        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(167,139,250,0.06), transparent);
+        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(212,104,42,0.14), transparent),
+        radial-gradient(ellipse 50% 40% at 80% 90%, rgba(232,146,77,0.09), transparent);
     }
 
     .container {
@@ -54,19 +56,20 @@
     }
 
     .avatar {
-      width: 90px;
-      height: 90px;
+      width: 96px;
+      height: 96px;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      font-weight: 700;
-      color: white;
+      background: var(--surface2);
+      overflow: hidden;
       box-shadow: 0 0 0 3px var(--surface2), 0 0 0 5px var(--border), 0 8px 32px var(--glow);
-      user-select: none;
       flex-shrink: 0;
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 28% 15%;
     }
 
     .profile h1 {
@@ -89,23 +92,25 @@
       border-radius: 999px;
       padding: 0.3rem 0.85rem;
       font-size: 0.75rem;
-      color: var(--accent2);
+      color: #e8924d;
       font-weight: 500;
     }
 
-    /* ── STREAK badge dentro del botón Duolingo ── */
+    /* ── STREAK badge ── */
     .streak-badge {
-      display: inline-flex;
+      display: flex;
       align-items: center;
+      justify-content: center;
       gap: 0.25rem;
       font-size: 0.72rem;
       font-weight: 700;
-      color: #ff8800;
-      background: rgba(255,136,0,0.12);
-      border: 1px solid rgba(255,136,0,0.25);
-      border-radius: 999px;
-      padding: 0.15rem 0.5rem;
-      line-height: 1.4;
+      color: #e07830;
+      background: rgba(212,104,42,0.1);
+      border: 1px solid rgba(212,104,42,0.25);
+      border-radius: 8px;
+      padding: 0.4rem 0.6rem;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     /* ── LINKS ── */
@@ -194,6 +199,34 @@
 
     .link-card:hover .link-arrow { opacity: 1; transform: translateX(3px); }
 
+    /* ── BOTÓN DE DESCARGA ── */
+    .download-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+      padding: 0.4rem 0.7rem;
+      background: rgba(212,104,42,0.1);
+      border: 1px solid rgba(212,104,42,0.25);
+      border-radius: 8px;
+      color: #e8924d;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-decoration: none;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: background 0.18s, border-color 0.18s, transform 0.18s;
+      cursor: pointer;
+    }
+
+    .download-btn:hover {
+      background: rgba(212,104,42,0.2);
+      border-color: #d4682a;
+      transform: translateY(-1px);
+    }
+
+    .download-btn svg { flex-shrink: 0; }
+
     /* ── ICON COLORS ── */
     .ig  { background: linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045); }
     .tt  { background: #010101; border: 1px solid #333; }
@@ -244,7 +277,7 @@ const ICONOS = {
   fb:  `<svg viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>`,
   dc:  `<svg viewBox="0 0 24 24" fill="white"><path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>`,
   sp:  `<svg viewBox="0 0 24 24" fill="white"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>`,
-  duo: `<svg viewBox="0 0 24 24" fill="white"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm-.08 4.242c1.81 0 3.307.58 4.49 1.742 1.183 1.162 1.774 2.626 1.774 4.393 0 1.226-.29 2.32-.871 3.283-.58.962-1.408 1.718-2.483 2.27l3.27 4.828h-3.6l-2.77-4.27h-1.31v4.27H7.507V4.242h4.413zm-.161 2.681H10.51v4.867h1.249c.881 0 1.56-.232 2.038-.695.478-.463.717-1.1.717-1.91 0-.787-.232-1.403-.695-1.848-.463-.443-1.116-.414-2.06-.414z"/></svg>`,
+  duo: `<img src="LOGO_DUOLINGO.png" style="width:26px;height:26px;object-fit:contain;">`,
   li:  `<svg viewBox="0 0 24 24" fill="white"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>`,
   gh:  `<svg viewBox="0 0 24 24" fill="white"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>`,
   cv:  `<svg viewBox="0 0 24 24" fill="white"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm4 18H6V4h7v5h5v11zM8 15h8v2H8v-2zm0-4h8v2H8v-2zm0-4h5v2H8V7z"/></svg>`,
@@ -260,7 +293,7 @@ function buildPage() {
   // Perfil
   app.innerHTML = `
     <div class="profile">
-      <div class="avatar">${CONFIG.iniciales}</div>
+      <div class="avatar"><img src="FOTO_PERFIL.jpg" alt="Mario E. López C."></div>
       <h1>${CONFIG.nombre}</h1>
       <p class="tagline">${CONFIG.tagline}</p>
       <span class="badge">
@@ -294,17 +327,31 @@ function buildPage() {
       a.href = link.url;
       a.target = '_blank';
       a.rel = 'noopener';
-      const streakHTML = (link.id === 'duolingo')
-        ? `<span class="streak-badge">🔥 ${CONFIG.duolingoStreak} días</span>`
-        : '';
+      // Botón derecho: streak para Duolingo, descarga para CV, flecha para el resto
+      let rightHTML;
+      if (link.id === 'duolingo') {
+        rightHTML = `<span class="streak-badge">🔥 ${CONFIG.duolingoStreak}</span>`;
+      } else if (link.id === 'cv' && link.urlDescarga) {
+        rightHTML = `<a class="download-btn" href="${link.urlDescarga}" download
+             onclick="event.stopPropagation()">
+             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+               <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+               <polyline points="7 10 12 15 17 10"/>
+               <line x1="12" y1="15" x2="12" y2="3"/>
+             </svg>
+             PDF
+           </a>`;
+      } else {
+        rightHTML = ARROW;
+      }
 
       a.innerHTML = `
         <div class="link-icon ${link.icono}">${ICONOS[link.icono] || ''}</div>
         <div class="link-info">
-          <span class="link-name">${link.nombre} ${streakHTML}</span>
+          <span class="link-name">${link.nombre}</span>
           <span class="link-handle">${link.handle}</span>
         </div>
-        ${ARROW}
+        ${rightHTML}
       `;
       container.appendChild(a);
     });
