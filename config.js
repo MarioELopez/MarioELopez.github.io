@@ -8,6 +8,7 @@ const CONFIG = {
   // ── PERFIL ──────────────────────────────────────────────
   nombre:    "Mario E. López C.",
   tagline:   "Ingeniería Industrial · Santa Cruz, Bolivia",
+  descripcion: "Automatización de procesos · Análisis de datos · Desarrollo de proyectos",
   badge:     "Disponible para oportunidades",
   iniciales: "ML",
 
