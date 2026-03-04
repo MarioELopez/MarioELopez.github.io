@@ -45,7 +45,8 @@ const CONFIG = {
       id:      "discord",
       nombre:  "Discord",
       handle:  "@mario_e_lopez",
-      url:     "https://discord.com/",   // Reemplaza con tu link de servidor o perfil
+      url:     null,
+      discordUser: "mario_e_lopez",  // Usuario que se copiará al portapapeles
       icono:   "dc",
       seccion: "social"
     },
@@ -69,7 +70,7 @@ const CONFIG = {
       id:      "linkedin",
       nombre:  "LinkedIn",
       handle:  "Mario Eduardo López Cáceres",
-      url:     "https://www.linkedin.com/in/mario-eduardo-l%C3%B3pez-c%C3%A1ceres-8aa27b174",
+      url:     "https://www.linkedin.com/in/mario-eduardo-lopez-caceres-8aa27b174",
       icono:   "li",
       seccion: "profesional"
     },
