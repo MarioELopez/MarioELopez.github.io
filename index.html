@@ -170,7 +170,7 @@
       padding: 0.75rem 1rem;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-left: 3px solid var(--accent2);
+      border-left: 3px solid #d4682a;
       border-radius: 12px;
       font-size: 0.8rem;
       color: var(--text-muted);
@@ -377,6 +377,37 @@
       opacity: 0.45;
       text-align: center;
       padding-bottom: 0.5rem;
+    }
+
+    /* ── RIPPLE ── */
+    .link-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      transform: scale(0);
+      animation: ripple-anim 0.55s linear;
+      background: rgba(255, 255, 255, 0.08);
+      pointer-events: none;
+    }
+
+    @keyframes ripple-anim {
+      to { transform: scale(4); opacity: 0; }
+    }
+
+    /* ── SCROLL REVEAL ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     /* ── RESPONSIVE ── */
@@ -601,6 +632,48 @@ function animateStreak() {
   setTimeout(() => requestAnimationFrame(update), 900);
 }
 animateStreak();
+
+// ── RIPPLE EFFECT ──
+document.addEventListener('click', e => {
+  const card = e.target.closest('.link-card');
+  if (!card) return;
+  const ripple = document.createElement('span');
+  const rect   = card.getBoundingClientRect();
+  const size   = Math.max(rect.width, rect.height);
+  ripple.className = 'ripple';
+  ripple.style.cssText = `
+    width: ${size}px; height: ${size}px;
+    left: ${e.clientX - rect.left - size/2}px;
+    top:  ${e.clientY - rect.top  - size/2}px;
+  `;
+  card.appendChild(ripple);
+  ripple.addEventListener('animationend', () => ripple.remove());
+});
+
+// ── SCROLL REVEAL ──
+const revealObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      revealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+function initReveal() {
+  document.querySelectorAll('.link-card, .actualmente, .section-label')
+    .forEach((el, i) => {
+      // Solo si no tiene ya fade-up (el perfil ya tiene su animacion)
+      if (!el.classList.contains('fade-up')) {
+        el.classList.add('reveal');
+        el.style.transitionDelay = (i * 0.05) + 's';
+        revealObserver.observe(el);
+      }
+    });
+}
+
+// Esperar a que buildPage termine
+setTimeout(initReveal, 100);
 
 // ── BOTÓN COMPARTIR ──
 const shareBtn = document.getElementById('share-btn');
