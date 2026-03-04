@@ -12,6 +12,19 @@ const CONFIG = {
   badge:     "Disponible para oportunidades",
   iniciales: "ML",
 
+  // ── CHIPS DE HABILIDADES ──
+  skills: [
+    { nombre: "Python",            icono: "🐍" },
+    { nombre: "Lean Manufacturing", icono: "⚙️" },
+    { nombre: "VBA",              icono: "⚡" },
+  ],
+
+  // ── ACTUALMENTE ──
+  actualmente: "Desarrollando mi proyecto de grado en Ingeniería Industrial",
+
+  // ── URL DE LA PÁGINA (para el botón de compartir) ──
+  siteUrl: "https://marioelopez.github.io",
+
   // ── DUOLINGO STREAK ─────────────────────────────────────
   duolingoStreak: 767,   // Actualiza este número cuando quieras
   duolingoIdioma: "Inglés",
@@ -65,6 +78,14 @@ const CONFIG = {
       handle:  "@MarioELopez11",
       url:     "https://www.duolingo.com/profile/MarioELopez11",
       icono:   "duo",
+      seccion: "social"
+    },
+    {
+      id:      "strava",
+      nombre:  "Strava",
+      handle:  "🚴 Cargando stats...",
+      url:     "https://www.strava.com/athletes/mario_e_lopez",
+      icono:   "strava",
       seccion: "social"
     },
     {
