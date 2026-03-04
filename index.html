@@ -569,11 +569,11 @@ function buildPage() {
 }
 
 // ── STRAVA STATS ──
-fetch('./strava.json')
+fetch('./strava.json?v=' + Date.now())
   .then(r => r.json())
   .then(data => {
     const el = document.getElementById('strava-handle');
-    if (el && data.display && data.display !== 'Cargando...') {
+    if (el && data.display && data.km_alltime > 0) {
       el.textContent = '🚴 ' + data.display;
     }
   })
