@@ -106,6 +106,82 @@
       letter-spacing: 0.01em;
     }
 
+    /* ── SKILL CHIPS ── */
+    .skills {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.4rem;
+      margin-top: 0.1rem;
+    }
+
+    .skill-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.22rem 0.7rem;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      transition: border-color 0.18s, color 0.18s;
+    }
+
+    .skill-chip:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+
+    /* ── BOTÓN COMPARTIR ── */
+    .share-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.3rem 0.85rem;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color 0.18s, color 0.18s;
+      margin-top: 0.25rem;
+    }
+
+    .share-btn:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+
+    .share-btn.copied {
+      border-color: rgba(59,195,120,0.4);
+      color: #3bc378;
+    }
+
+    /* ── ACTUALMENTE ── */
+    .actualmente {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent2);
+      border-radius: 12px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .actualmente strong {
+      color: var(--text);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
     .badge {
       display: inline-flex;
       align-items: center;
@@ -354,12 +430,29 @@ function buildPage() {
       <div class="avatar fade-up" style="animation-delay: 0.05s"><img src="FOTO_PERFIL.jpg" alt="Mario E. López C."></div>
       <h1 class="fade-up" style="animation-delay: 0.15s">${CONFIG.nombre}</h1>
       <p class="tagline fade-up" style="animation-delay: 0.22s">${CONFIG.tagline}</p>
-      <p class="descripcion fade-up" style="animation-delay: 0.28s">${CONFIG.descripcion}</p>
-      <span class="badge fade-up" style="animation-delay: 0.35s">
+      <p class="descripcion fade-up" style="animation-delay: 0.28s">${CONFIG.descripcion || ''}</p>
+      <div class="skills fade-up" style="animation-delay: 0.33s">
+        ${(CONFIG.skills || []).map(s => `<span class="skill-chip">${s.icono} ${s.nombre}</span>`).join('')}
+      </div>
+      <span class="badge fade-up" style="animation-delay: 0.4s">
         <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>
         ${CONFIG.badge}
       </span>
+      <button class="share-btn fade-up" id="share-btn" style="animation-delay: 0.46s">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+        </svg>
+        <span id="share-label">Compartir página</span>
+      </button>
     </div>
+
+    ${CONFIG.actualmente ? `
+    <div class="actualmente fade-up" style="animation-delay: 0.42s">
+      <span>🔨</span>
+      <span><strong>Actualmente:</strong> ${CONFIG.actualmente}</span>
+    </div>` : ''}
 
     <div class="links" id="links-container"></div>
 
@@ -461,11 +554,12 @@ function buildPage() {
         rightHTML = ARROW;
       }
 
+      const handleId = link.id === 'strava' ? 'id="strava-handle"' : '';
       a.innerHTML = `
         <div class="link-icon ${link.icono}">${ICONOS[link.icono] || ''}</div>
         <div class="link-info">
           <span class="link-name">${link.nombre}</span>
-          <span class="link-handle">${link.handle}</span>
+          <span class="link-handle" ${handleId}>${link.handle}</span>
         </div>
         ${rightHTML}
       `;
@@ -473,6 +567,17 @@ function buildPage() {
     });
   });
 }
+
+// ── STRAVA STATS ──
+fetch('./strava.json')
+  .then(r => r.json())
+  .then(data => {
+    const el = document.getElementById('strava-handle');
+    if (el && data.display && data.display !== 'Cargando...') {
+      el.textContent = '🚴 ' + data.display;
+    }
+  })
+  .catch(() => {});
 
 buildPage();
 
@@ -496,6 +601,27 @@ function animateStreak() {
   setTimeout(() => requestAnimationFrame(update), 900);
 }
 animateStreak();
+
+// ── BOTÓN COMPARTIR ──
+const shareBtn = document.getElementById('share-btn');
+const shareLabel = document.getElementById('share-label');
+if (shareBtn) {
+  shareBtn.addEventListener('click', () => {
+    const url = CONFIG.siteUrl || window.location.href;
+    if (navigator.share) {
+      navigator.share({ title: CONFIG.nombre, url });
+    } else {
+      navigator.clipboard.writeText(url).then(() => {
+        shareBtn.classList.add('copied');
+        shareLabel.textContent = '\u2713 Link copiado';
+        setTimeout(() => {
+          shareBtn.classList.remove('copied');
+          shareLabel.textContent = 'Compartir p\u00e1gina';
+        }, 2000);
+      });
+    }
+  });
+}
 </script>
 </body>
 </html>
