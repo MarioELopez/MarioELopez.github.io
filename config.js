@@ -7,29 +7,71 @@ const CONFIG = {
 
   // ── PERFIL ──────────────────────────────────────────────
   nombre:    "Mario E. López C.",
-  tagline:   "Ingeniería Industrial · Santa Cruz, Bolivia",
-  descripcion: "Automatización de procesos · Análisis de datos · Desarrollo de proyectos",
-  badge:     "Disponible para oportunidades",
   iniciales: "ML",
 
-  // ── CHIPS DE HABILIDADES ──
-  skills: [
-    { nombre: "Python",            icono: "🐍" },
-    { nombre: "Lean Manufacturing", icono: "⚙️" },
-    { nombre: "VBA",              icono: "⚡" },
-  ],
+  // ── MODOS ───────────────────────────────────────────────
+  //  pro    → se activa con ?mode=pro (link del CV)
+  //  casual → default (link de Instagram, etc.)
+  //
+  //  En ordenLinks podés usar marcadores de sección:
+  //    "_social"      → muestra el label "Redes Sociales"
+  //    "_profesional"  → muestra el label "Profesional"
+  // ────────────────────────────────────────────────────────
+  modos: {
+    pro: {
+      tagline:     "Ing. Industrial | Gestión de Producción · Datos & Automatización",
+      descripcion: null,
+      badge:       "Disponible para oportunidades",
+      actualmente: "Desarrollando mi proyecto de grado en Ingeniería Industrial",
+      ordenLinks:  ["cv", "linkedin", "github", "instagram", "strava"],
+      mostrarCV:    true,
+      mostrarSkills: true,
+      // Chips específicos de este modo:
+      skills: [
+        { nombre: "Python",            icono: "🐍" },
+        { nombre: "Power BI",          icono: "📊" },
+        { nombre: "Excel",             icono: "📊" },
+        { nombre: "Lean Manufacturing", icono: "⚙️" },
+        { nombre: "VBA",               icono: "⚡" },
+      ],
+    },
+    casual: {
+      // ✏️ Cambiá estas frases cuando quieras:
+      tagline:     "Ingeniería Industrial · Santa Cruz, Bolivia",
+      descripcion: null,
+      badge:       null,
+      actualmente: "Reparando mi bicicleta para volver a rodar",
+      ordenLinks:  [
+        "_social",
+        "instagram", "tiktok", "facebook", "spotify", "duolingo", "strava", "discord",
+        "_profesional_toggle",
+        "cv", "linkedin", "github"
+      ],
+      mostrarCV:    true,
+      mostrarSkills: true,
+    },
+  },
 
-  // ── ACTUALMENTE ──
-  actualmente: "Desarrollando mi proyecto de grado en Ingeniería Industrial",
+  // ── CHIPS DE HABILIDADES (default, se sobreescribe si el modo tiene los suyos) ──
+  skills: [
+    { nombre: "Ciclismo",        icono: "🚴" },
+    { nombre: "Frontón",          icono: "🎾" },
+    { nombre: "Inglés",           icono: "🇺🇸" },
+    { nombre: "Automatización",   icono: "⚙️" },
+  ],
 
   // ── URL DE LA PÁGINA (para el botón de compartir) ──
   siteUrl: "https://marioelopez.github.io",
 
   // ── DUOLINGO STREAK ─────────────────────────────────────
-  duolingoStreak: 767,   // Actualiza este número cuando quieras
+  //  fechaInicioStreak: el día que empezaste tu racha
+  //  La página calcula los días automáticamente desde esa fecha
+  fechaInicioStreak: "2024-01-25",  // Formato: YYYY-MM-DD (773 días al 8/mar/2026)
   duolingoIdioma: "Inglés",
 
-  // ── REDES SOCIALES ──────────────────────────────────────
+  // ── REDES / LINKS ───────────────────────────────────────
+  //  El orden aquí NO importa; lo define cada modo arriba.
+  //  Solo se muestran los IDs que aparecen en ordenLinks.
   links: [
     {
       id:      "instagram",
@@ -37,7 +79,6 @@ const CONFIG = {
       handle:  "@marioelopez2011",
       url:     "https://www.instagram.com/marioelopez2011",
       icono:   "ig",
-      seccion: "social"
     },
     {
       id:      "tiktok",
@@ -45,7 +86,6 @@ const CONFIG = {
       handle:  "@mario_e_lopez",
       url:     "https://www.tiktok.com/@mario_e_lopez",
       icono:   "tt",
-      seccion: "social"
     },
     {
       id:      "facebook",
@@ -53,16 +93,14 @@ const CONFIG = {
       handle:  "Capitalista Técnico Analista",
       url:     "https://www.facebook.com/Capitalista.Tecnico.Analista",
       icono:   "fb",
-      seccion: "social"
     },
     {
       id:      "discord",
       nombre:  "Discord",
       handle:  "@mario_e_lopez",
       url:     null,
-      discordUser: "mario_e_lopez",  // Usuario que se copiará al portapapeles
+      discordUser: "mario_e_lopez",
       icono:   "dc",
-      seccion: "social"
     },
     {
       id:      "spotify",
@@ -70,7 +108,6 @@ const CONFIG = {
       handle:  "Mario E. López",
       url:     "https://open.spotify.com/user/wuf84is4sj60wzyh6cyozurkq",
       icono:   "sp",
-      seccion: "social"
     },
     {
       id:      "duolingo",
@@ -78,7 +115,6 @@ const CONFIG = {
       handle:  "@MarioELopez11",
       url:     "https://www.duolingo.com/profile/MarioELopez11",
       icono:   "duo",
-      seccion: "social"
     },
     {
       id:      "strava",
@@ -86,7 +122,6 @@ const CONFIG = {
       handle:  "🚴 Cargando stats...",
       url:     "https://www.strava.com/athletes/95307903",
       icono:   "strava",
-      seccion: "social"
     },
     {
       id:      "linkedin",
@@ -94,7 +129,6 @@ const CONFIG = {
       handle:  "Mario Eduardo López Cáceres",
       url:     "https://www.linkedin.com/in/mario-eduardo-lopez-caceres-8aa27b174",
       icono:   "li",
-      seccion: "profesional"
     },
     {
       id:      "github",
@@ -102,7 +136,6 @@ const CONFIG = {
       handle:  "@MarioELopez",
       url:     "https://github.com/MarioELopez",
       icono:   "gh",
-      seccion: "profesional"
     },
     {
       id:      "cv",
@@ -111,8 +144,7 @@ const CONFIG = {
       url:     "https://www.canva.com/design/DAHAlzexkmM/gzhliwIQDsy30xh4PfHfjw/view?utm_content=DAHAlzexkmM&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hd70d46c15b",
       urlDescarga: "./CV - MARIO GIT.pdf",
       icono:   "cv",
-      seccion: "profesional"
-    }
+    },
   ],
 
   // ── PIE DE PÁGINA ────────────────────────────────────────
