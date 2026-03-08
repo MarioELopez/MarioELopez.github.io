@@ -127,7 +127,7 @@ const CONFIG = {
       id:      "linkedin",
       nombre:  "LinkedIn",
       handle:  "Mario Eduardo López Cáceres",
-      url:     "https://www.linkedin.com/in/mario-eduardo-l%C3%B3pez-c%C3%A1ceres-8aa27b174/",
+      url:     "https://www.linkedin.com/in/marioelopezc/",
       icono:   "li",
     },
     {
