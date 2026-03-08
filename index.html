@@ -327,8 +327,8 @@
 </head>
 <body>
 
-<!-- Toggle fijo arriba izquierda — siempre dice "Modo Profesional" -->
-<div class="mode-toggle" id="mode-toggle" title="Cambiar modo">
+<!-- Toggle fijo arriba derecha — solo visible en modo pro -->
+<div class="mode-toggle" id="mode-toggle" title="Cambiar modo" style="display:none">
   <div class="toggle-track" id="toggle-track">
     <div class="toggle-knob"></div>
   </div>
@@ -342,11 +342,11 @@
 
 // ── DETECTAR MODO ──
 function getMode() {
-  var params = new URLSearchParams(window.location.search);
-  return params.get('mode') === 'pro' ? 'pro' : 'casual';
+  return window.location.hash === '#pro' ? 'pro' : 'casual';
 }
 
 var currentMode = getMode();
+var enteredAsPro = (currentMode === 'pro'); // recuerda cómo entró
 
 function getModeConfig() {
   return CONFIG.modos[currentMode];
@@ -354,12 +354,21 @@ function getModeConfig() {
 
 // ── ACTUALIZAR TOGGLE VISUAL ──
 function updateToggleUI() {
+  var toggle = document.getElementById('mode-toggle');
   var track = document.getElementById('toggle-track');
-  if (!track) return;
+  if (!toggle || !track) return;
+
+  // Solo mostrar el toggle si entraste por ?mode=pro
+  // Desde casual puro no se ve el botón
   if (currentMode === 'pro') {
+    toggle.style.display = 'flex';
     track.classList.add('active');
-  } else {
+  } else if (enteredAsPro) {
+    // Si entró por pro y cambió a casual, sigue visible
+    toggle.style.display = 'flex';
     track.classList.remove('active');
+  } else {
+    toggle.style.display = 'none';
   }
 }
 
@@ -579,13 +588,7 @@ function buildPage() {
 // ── TOGGLE DE MODO ──
 document.getElementById('mode-toggle').addEventListener('click', function() {
   currentMode = currentMode === 'pro' ? 'casual' : 'pro';
-  var url = new URL(window.location);
-  if (currentMode === 'pro') {
-    url.searchParams.set('mode', 'pro');
-  } else {
-    url.searchParams.delete('mode');
-  }
-  window.history.replaceState({}, '', url);
+  window.location.hash = currentMode === 'pro' ? '#pro' : '';
   buildPage();
   loadStrava();
   animateStreak();

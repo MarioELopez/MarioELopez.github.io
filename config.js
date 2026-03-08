@@ -45,9 +45,9 @@ const CONFIG = {
         "_social",
         "instagram", "tiktok", "facebook", "spotify", "duolingo", "strava", "discord",
         "_profesional_toggle",
-        "cv", "linkedin", "github"
+        "linkedin", "github"
       ],
-      mostrarCV:    true,
+      mostrarCV:    false,
       mostrarSkills: true,
     },
   },
