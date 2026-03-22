@@ -1,15 +1,15 @@
 {
-  "actualizado": "2026-03-22T21:25:15.226503+00:00",
-  "km_anio": 0.0,
-  "km_alltime": 1858.9,
+  "actualizado": "2026-03-22T22:24:24.420357+00:00",
+  "km_anio": 57.0,
+  "km_alltime": 1915.9,
   "pr_distancia": 66.5,
   "pr_velocidad": 23.5,
   "ultima": {
-    "nombre": "ENFRIAMIENTO ELECTORAL",
-    "distancia": 11.9,
-    "tiempo": 2542,
-    "fecha": "2025-08-17",
-    "velocidad": 16.9
+    "nombre": "CALENTANDO MOTORES 🚀",
+    "distancia": 57.0,
+    "tiempo": 17643,
+    "fecha": "2026-03-22",
+    "velocidad": 11.6
   },
   "modo": "pr",
   "display": "🏆 66.5 km · ⚡ 23.5 km/h"
