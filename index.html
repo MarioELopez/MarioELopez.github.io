@@ -17,7 +17,7 @@
   <meta name="twitter:card" content="summary">
 
   <!-- Seguridad: Content Security Policy -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://cdn.jsdelivr.net https://files.pythonhosted.org https://pypi.org; worker-src blob:;">
 
   <!-- Datos estructurados para Google (Knowledge Panel) -->
   <script type="application/ld+json">
@@ -536,9 +536,9 @@
       position: fixed; inset: 0; z-index: 9999;
       background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
       display: flex; align-items: center; justify-content: center; cursor: pointer;
-      opacity: 0; transition: opacity 0.2s ease;
+      opacity: 0; transition: opacity 0.2s ease; pointer-events: none;
     }
-    .lightbox.lb-visible { opacity: 1; }
+    .lightbox.lb-visible { opacity: 1; pointer-events: all; }
     .lightbox-img {
       width: min(280px,90vw); height: min(280px,90vw);
       border-radius: 50%; object-fit: cover; object-position: 28% 15%;
@@ -550,7 +550,16 @@
     /* ── VISITED CARD OVERLAY ── */
     .visited-overlay {
       position: absolute; inset: 0; border-radius: 14px;
-      background: rgba(0,0,0,0.16); pointer-events: none; z-index: 2;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.06);
+      pointer-events: none; z-index: 2;
+      transition: opacity 0.3s ease;
+    }
+    .visited-overlay::after {
+      content: '✓';
+      position: absolute; top: 8px; right: 11px;
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.28);
     }
 
     /* ── GLITCH (terminal easter egg) ── */
@@ -668,6 +677,31 @@
       padding: 0.28rem 1rem; background: #161b22;
       border-top: 1px solid #21262d; font-size: 0.6rem;
       color: #6e7681; flex-shrink: 0; letter-spacing: 0.04em;
+    }
+
+    /* ── GLOBAL TAP HIGHLIGHT FIX ── */
+    * { -webkit-tap-highlight-color: transparent; }
+
+    /* ── TERMINAL SCROLLBAR ── */
+    #t-out::-webkit-scrollbar, #py-editor-out::-webkit-scrollbar { width: 4px; }
+    #t-out::-webkit-scrollbar-track, #py-editor-out::-webkit-scrollbar-track { background: transparent; }
+    #t-out::-webkit-scrollbar-thumb, #py-editor-out::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+    #t-out::-webkit-scrollbar-thumb:hover, #py-editor-out::-webkit-scrollbar-thumb:hover { background: #444; }
+    #t-out { scrollbar-color: #2a2a2a transparent; scrollbar-width: thin; }
+
+    /* ── TERMINAL MOBILE: word-wrap & keyboard resize ── */
+    #ml-terminal { height: 100dvh; }
+    @media (max-width: 767px) {
+      #t-out { word-break: break-word; overflow-wrap: break-word; }
+      #t-out span { display: inline; white-space: pre-wrap; }
+    }
+
+    /* ── LINK-CARD: prevent text selection on click ── */
+    .link-card { user-select: none; -webkit-user-select: none; }
+
+    /* ── MOBILE CARD BLUR: smooth transition ── */
+    @media (max-width: 767px) {
+      .link-card { transition: filter 0.3s ease, opacity 0.3s ease, transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease; }
     }
   </style>
 </head>
@@ -1150,40 +1184,25 @@ function switchMode(newMode) {
   if (newMode === currentMode) return;
   var app = document.getElementById('app');
 
-  // Fade rápido con blur (0.18s salida) — lo mínimo para evitar flash
-  app.style.transition = 'opacity 0.18s ease, filter 0.18s ease';
-  app.style.opacity = '0.08';
-  app.style.filter = 'blur(2px)';
+  // Fade out
+  app.style.transition = 'opacity 0.2s ease, filter 0.2s ease';
+  app.style.opacity = '0';
+  app.style.filter = 'blur(3px)';
 
   setTimeout(function() {
     currentMode = newMode;
     window.location.hash = currentMode === 'pro' ? '#pro' : '';
     buildPage(); loadStrava(); animateStreak(); loadMeta();
 
-    // ── Elementos "persistentes": quitar fade-up para que no re-animen
-    // La foto, el nombre y las stats son idénticos en ambos modos.
-    // Sin esto, el .fade-up hace que arranquen en opacity:0 y parezca que
-    // la foto se recarga desde cero.
-    var persist = ['.avatar-wrap', '.avatar', 'h1', '.stats-row'];
-    persist.forEach(function(sel) {
-      var el = document.querySelector(sel);
-      if (el) {
-        el.classList.remove('fade-up');
-        el.style.opacity = '1';
-        el.style.animation = 'none';
-      }
-    });
-
-    // Fade de entrada más lento (se nota la fluidez)
-    app.style.transition = 'opacity 0.3s ease, filter 0.3s ease';
+    // Fade in — todo se reconstruye fluidamente junto
+    app.style.transition = 'opacity 0.32s ease, filter 0.32s ease';
     requestAnimationFrame(function() {
       app.style.opacity = '1';
       app.style.filter = 'blur(0)';
-      setTimeout(typewriterEffect, 180);
-      // Inicializar scroll hero si aplica (casual + mobile)
-      setTimeout(initMobileScrollHero, 50);
+      setTimeout(typewriterEffect, 200);
+      setTimeout(initMobileScrollHero, 60);
     });
-  }, 190);
+  }, 210);
 }
 
 document.getElementById('mode-toggle').addEventListener('click', function(e) {
@@ -1512,7 +1531,15 @@ document.addEventListener('click', function(e) {
   var card = e.target.closest('.link-card[data-link-id]');
   if (!card) return;
   var lid = card.getAttribute('data-link-id');
-  if (lid) markVisited(lid);
+  if (!lid) return;
+  markVisited(lid);
+  // Aplicar overlay inmediatamente (sin esperar a buildPage)
+  if (!card.querySelector('.visited-overlay')) {
+    var ov = document.createElement('div');
+    ov.className = 'visited-overlay';
+    card.style.position = 'relative';
+    card.appendChild(ov);
+  }
 }, true);
 
 // ══════════════════════════════════════════════════════
@@ -1823,7 +1850,7 @@ function _execCmd(raw) {
       _tPrint(_tLine('  git status / branch        → estado del repo', 'tc'));
       _tPrint(_tLine('  git checkout <modo>        → cambiar a pro/casual', 'tc'));
       _tPrint(_tLine('  SELECT * FROM <tabla>      → SQL (skills/redes/perfil/…)', 'tc'));
-      _tPrint(_tLine('  python                     → REPL Python real (Skulpt)', 'tc'));
+      _tPrint(_tLine('  python                     → REPL Python real (Pyodide)', 'tc'));
       _tPrint(_tLine('  nano [archivo.py]          → editor de código con output panel', 'tc'));
       _tPrint(_tLine('  run <archivo.py>           → ejecutar archivo guardado', 'tc'));
       _tPrint(_tLine('  reset                      → limpiar pantalla + sesión Python', 'tc'));
@@ -1849,22 +1876,37 @@ function _execCmd(raw) {
         _tPrint(_tLine('cat: ' + fname + ': No existe el archivo', 'te'));
       }
       break;
-    case 'whoami':
-      // neofetch-style
-      _tPrint(_tLine('', ''));
-      _tPrint(_tLine('        ███╗   ███╗    mario@portfolio', 'th'));
-      _tPrint(_tLine('        ████╗ ████║    ───────────────────────────────', 'th'));
-      _tPrint(_tLine('        ██╔████╔██║    OS:      Santa Cruz, Bolivia 🇧🇴', 'th'));
-      _tPrint(_tLine('        ██║╚██╔╝██║    Shell:   vida.sh v26.0', 'th'));
-      _tPrint(_tLine('        ██║ ╚═╝ ██║    Carrera: Ingeniería Industrial · UAGRM', 'th'));
-      _tPrint(_tLine('        ╚═╝     ╚═╝    Stack:   Python · Power BI · Excel · VBA', 'th'));
-      _tPrint(_tLine('                        Hobby:   🚴 ' + Math.round((new Date() - new Date('2024-01-25')) / 86400000) + ' días de Duolingo 🦉', 'th'));
-      _tPrint(_tLine('                        Activo:  proyecto de grado UAGRM [WIP]', 'th'));
-      _tPrint(_tLine('                        GitHub:  github.com/MarioELopez', 'th'));
-      _tPrint(_tLine('', ''));
-      _tPrint(_tLine('                        ■■■ dark ■■■ orange ■■■ green ■■■ muted', 'tc'));
-      _tPrint(_tLine('', ''));
+    case 'whoami': {
+      var _duoDays = Math.round((new Date() - new Date('2024-01-25')) / 86400000);
+      var _narrow  = window.innerWidth < 520;
+      if (_narrow) {
+        // Versión compacta para pantallas pequeñas
+        _tPrint(_tLine('mario@portfolio', 'th'));
+        _tPrint(_tLine('─────────────────────────', 'th'));
+        _tPrint(_tLine('OS:      Santa Cruz, Bolivia 🇧🇴', 'th'));
+        _tPrint(_tLine('Shell:   vida.sh v26.0', 'th'));
+        _tPrint(_tLine('Carrera: Ing. Industrial · UAGRM', 'th'));
+        _tPrint(_tLine('Stack:   Python · Power BI · Excel', 'th'));
+        _tPrint(_tLine('Duolingo: 🦉 ' + _duoDays + ' días', 'th'));
+        _tPrint(_tLine('GitHub:  MarioELopez', 'th'));
+      } else {
+        // Versión completa neofetch para pantallas más anchas
+        _tPrint(_tLine('', ''));
+        _tPrint(_tLine('   ███╗   ███╗    mario@portfolio', 'th'));
+        _tPrint(_tLine('   ████╗ ████║    ─────────────────────────────────', 'th'));
+        _tPrint(_tLine('   ██╔████╔██║    OS:      Santa Cruz, Bolivia 🇧🇴', 'th'));
+        _tPrint(_tLine('   ██║╚██╔╝██║    Shell:   vida.sh v26.0', 'th'));
+        _tPrint(_tLine('   ██║ ╚═╝ ██║    Carrera: Ing. Industrial · UAGRM', 'th'));
+        _tPrint(_tLine('   ╚═╝     ╚═╝    Stack:   Python · Power BI · Excel · VBA', 'th'));
+        _tPrint(_tLine('                  Duolingo: 🦉 ' + _duoDays + ' días de racha', 'th'));
+        _tPrint(_tLine('                  Activo:   proyecto de grado [WIP]', 'th'));
+        _tPrint(_tLine('                  GitHub:   github.com/MarioELopez', 'th'));
+        _tPrint(_tLine('', ''));
+        _tPrint(_tLine('                  ■■■ dark  ■■■ orange  ■■■ green  ■■■ muted', 'tc'));
+        _tPrint(_tLine('', ''));
+      }
       break;
+    }
     case 'skills':
       var sks = (CONFIG.modos[currentMode].skills || CONFIG.skills || []);
       _tPrint(_tLine(sks.map(function(s){ return s.icono + ' ' + s.nombre; }).join('  '), 'th'));
@@ -1952,8 +1994,8 @@ function _execCmd(raw) {
         _pySessionCode = '';
         var pEl4 = document.getElementById('t-prompt');
         if (pEl4) pEl4.textContent = '>>> ';
-        _tPrint(_tLine('Python 3.11 (Skulpt) — mario@portfolio', 'ts'));
-        _tPrint(_tLine('for/while/if/def/class/listas — estado persiste en la sesión', 'tc'));
+        _tPrint(_tLine('Python 3.12 (Pyodide) — numpy, pandas y más disponibles', 'ts'));
+        _tPrint(_tLine('Estado persiste en sesión · import pandas → se descarga automático', 'tc'));
         _tPrint(_tLine('Bloques: terminar con línea vacía · nano script.py = editor completo', 'tc'));
         _tPrint(_tLine('exit() para salir · reset para limpiar sesión', 'tc'));
       });
@@ -2064,119 +2106,137 @@ function _exitPythonMode() {
   if (pEl) pEl.textContent = 'mario@portfolio:~$ ';
 }
 
-// ── Carga lazy de Skulpt desde CDN ────────────────────────────────
-function _loadSkulpt(cb) {
-  if (_skulptLoaded) { if(cb) cb(); return; }
-  if (_skulptLoading) { _skulptQueue.push(cb); return; }
-  _skulptLoading = true;
-  var s1 = document.createElement('script');
-  s1.src = 'https://cdnjs.cloudflare.com/ajax/libs/skulpt/1.2.0/skulpt.min.js';
-  s1.onload = function() {
-    var s2 = document.createElement('script');
-    s2.src = 'https://cdnjs.cloudflare.com/ajax/libs/skulpt/1.2.0/skulpt-stdlib.js';
-    s2.onload = function() {
-      _skulptLoaded = true;
-      _skulptLoading = false;
-      if (cb) cb();
-      _skulptQueue.forEach(function(fn) { if(fn) fn(); });
-      _skulptQueue = [];
-    };
-    s2.onerror = function() {
-      _tPrint(_tLine('Error cargando Skulpt stdlib', 'te'));
-      _skulptLoading = false;
-    };
-    document.head.appendChild(s2);
-  };
-  s1.onerror = function() {
-    _skulptLoading = false;
-    _tPrint(_tLine('Error cargando Skulpt. ¿Hay conexión a internet?', 'te'));
-  };
-  document.head.appendChild(s1);
+// ── Pyodide (Python real con pandas, numpy, etc.) ──────────────────
+// Sustituye a Skulpt — carga lazy desde CDN oficial
+var _pyodideReady   = false;
+var _pyodideLoading = false;
+var _pyodideInst    = null;  // instancia de pyodide
+
+// Emit output hacia terminal o editor
+function _pyEmit(text, isError, toEditor) {
+  if (toEditor) {
+    var outEl = document.getElementById('py-editor-out');
+    if (!outEl) return;
+    // Append raw text so \n characters are preserved by pre-wrap
+    if (isError) {
+      var errSpan = document.createElement('span');
+      errSpan.className = 'te';
+      errSpan.textContent = text;
+      outEl.appendChild(errSpan);
+    } else {
+      outEl.appendChild(document.createTextNode(text));
+    }
+    outEl.scrollTop = outEl.scrollHeight;
+  } else {
+    var lines = text.replace(/\n$/, '').split('\n');
+    lines.forEach(function(ln) {
+      var safe = ln.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      _tPrint('<span' + (isError ? ' class="te"' : '') + '>' + safe + '</span>');
+    });
+  }
 }
 
-// ── Ejecutar Python (REPL o editor) ───────────────────────────────
-// opts.editor = true  → output al panel del editor, no al terminal
-// opts.silent = true  → sin output (para re-ejecutar código de sesión)
+function _loadSkulpt(cb, statusFn) {
+  // Reusamos el nombre _loadSkulpt para compatibilidad; en realidad carga Pyodide
+  if (_pyodideReady) { _skulptLoaded = true; if(cb) cb(); return; }
+  if (_pyodideLoading) { _skulptQueue.push(cb); return; }
+  _pyodideLoading = true;
+  _skulptLoading  = true;
+
+  var updateStatus = statusFn || function(msg) {
+    var el = document.getElementById('py-editor-status');
+    if (el) el.textContent = msg;
+    _tPrint(_tLine(msg, 'ts'));
+  };
+
+  updateStatus('Cargando Pyodide (~10 MB, solo la primera vez)...');
+
+  var s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/pyodide/v0.27.3/full/pyodide.js';
+  s.onload = function() {
+    loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.27.3/full/' })
+      .then(function(py) {
+        _pyodideInst    = py;
+        _pyodideReady   = true;
+        _skulptLoaded   = true;
+        _pyodideLoading = false;
+        _skulptLoading  = false;
+        updateStatus('✓ Python (Pyodide) listo — pandas, numpy y más disponibles');
+        if (cb) cb();
+        _skulptQueue.forEach(function(fn) { if(fn) fn(); });
+        _skulptQueue = [];
+      })
+      .catch(function(err) {
+        _pyodideLoading = false; _skulptLoading = false;
+        updateStatus('Error iniciando Pyodide: ' + (err.message || err));
+      });
+  };
+  s.onerror = function() {
+    _pyodideLoading = false; _skulptLoading = false;
+    updateStatus('Error cargando Pyodide desde CDN. ¿Hay conexión a internet?');
+  };
+  document.head.appendChild(s);
+}
+
+// ── Ejecutar Python con Pyodide ────────────────────────────────────
+// opts.editor = true → output al panel del editor
 function _runSkulpt(code, opts) {
   opts = opts || {};
-  if (!_skulptLoaded) { _tPrint(_tLine('Python no está listo aún...', 'ts')); return; }
-
-  function builtinRead(x) {
-    if (typeof Sk !== 'undefined' && Sk.builtinFiles && Sk.builtinFiles['files'][x])
-      return Sk.builtinFiles['files'][x];
-    throw "File not found: '" + x + "'";
+  if (!_pyodideReady || !_pyodideInst) {
+    _tPrint(_tLine('Python no está listo aún...', 'ts'));
+    return;
   }
+  var py = _pyodideInst;
+  var toEditor = !!opts.editor;
 
-  // Para el REPL: ejecutar sesión previa sin output, luego el nuevo código con output
-  var fullCode = opts.editor ? code : (_pySessionCode + code);
-  var _outputActive = !opts.editor && !opts.silent ? false : true;
-  // (el output se activa después de que pasa el código viejo)
-  var _sessionLines = _pySessionCode.split('\n').length;
-  var _lineCounter = 0;
+  // Redirigir stdout y stderr
+  var stdoutBuf = [], stderrBuf = [];
+  py.setStdout({ batched: function(t) { stdoutBuf.push(t); } });
+  py.setStderr({ batched: function(t) { stderrBuf.push(t); } });
 
-  function _emitLine(text, isError) {
-    if (opts.editor) {
-      // Output al panel del editor
-      var outEl = document.getElementById('py-editor-out');
-      if (!outEl) return;
-      var span = document.createElement('span');
-      if (isError) span.className = 'te';
-      var lines = text.split('\n');
-      lines.forEach(function(ln, i) {
-        if (i === lines.length - 1 && ln === '') return;
-        var row = document.createElement('span');
-        if (isError) row.className = 'te';
-        row.textContent = ln;
-        outEl.appendChild(row);
-        outEl.appendChild(document.createTextNode('\n'));
-      });
-      outEl.scrollTop = outEl.scrollHeight;
-    } else {
-      // Output al terminal
-      var lines = text.split('\n');
-      lines.forEach(function(ln, idx) {
-        if (idx === lines.length - 1 && ln === '') return;
-        var safe = ln.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        _tPrint('<span' + (isError ? ' class="te"' : '') + '>' + safe + '</span>');
-      });
-    }
-  }
+  // Para el REPL, prefijar el código de sesión para estado persistente
+  var fullCode = toEditor ? code : (_pySessionCode + code);
 
-  Sk.configure({
-    output: function(text) {
-      if (opts.silent) return;
-      if (!opts.editor && _pySessionCode) {
-        // Contar líneas para saber cuándo termina el código viejo
-        _lineCounter++;
-        if (!_outputActive && _lineCounter > _sessionLines) _outputActive = true;
-        if (!_outputActive) return;
+  // loadPackagesFromImports + runPythonAsync
+  py.loadPackagesFromImports(fullCode)
+    .then(function() { return py.runPythonAsync(fullCode); })
+    .then(function(result) {
+      // Flush output — para REPL suprimir el output del código viejo de sesión
+      var sessionLineCount = _pySessionCode ? _pySessionCode.split('\n').length : 0;
+      var combinedOut = stdoutBuf.join('');
+      var combinedErr = stderrBuf.join('');
+
+      if (combinedOut) _pyEmit(combinedOut, false, toEditor);
+      if (combinedErr) _pyEmit(combinedErr, true,  toEditor);
+
+      // Mostrar repr del resultado si no es None (comportamiento REPL)
+      if (!toEditor && result !== undefined && result !== null) {
+        var repr = '';
+        try { repr = py.isPyProxy(result) ? result.toString() : ''; } catch(e) {}
+        if (repr && repr !== 'None') _pyEmit(repr, false, false);
+        try { if (py.isPyProxy(result)) result.destroy(); } catch(e) {}
       }
-      _emitLine(text, false);
-    },
-    read: builtinRead,
-    execLimit: 60000,
-  });
 
-  var promise = Sk.misceval.asyncToPromise(function() {
-    return Sk.importMainWithBody('<stdin>', false, fullCode, true);
-  });
+      // Añadir a sesión (REPL)
+      if (!toEditor) _pySessionCode += '\n' + code;
 
-  promise.then(function() {
-    if (!opts.editor && !opts.silent) {
-      _pySessionCode += code; // añadir a sesión exitosa
-    }
-    if (opts.editor) {
-      var statusEl = document.getElementById('py-editor-status');
-      if (statusEl) statusEl.textContent = '✓ Ejecutado · Ctrl+Enter: Run · Ctrl+S: Guardar · Ctrl+W: Cerrar';
-    }
-  }).catch(function(err) {
-    var msg = (err && err.toString) ? err.toString() : String(err);
-    _emitLine(msg, true);
-    if (opts.editor) {
-      var statusEl = document.getElementById('py-editor-status');
-      if (statusEl) statusEl.textContent = '✗ Error — ' + msg.split('\n')[0];
-    }
-  });
+      if (toEditor) {
+        var statusEl = document.getElementById('py-editor-status');
+        if (statusEl) statusEl.textContent = '\u2713 Ejecutado \u00b7 Ctrl+Enter: Run \u00b7 Ctrl+S: Guardar \u00b7 Ctrl+W: Cerrar';
+      }
+    })
+    .catch(function(err) {
+      var combinedOut = stdoutBuf.join('');
+      var combinedErr = stderrBuf.join('');
+      if (combinedOut) _pyEmit(combinedOut, false, toEditor);
+      if (combinedErr) _pyEmit(combinedErr, true,  toEditor);
+      var msg = err.message || String(err);
+      _pyEmit(msg, true, toEditor);
+      if (toEditor) {
+        var statusEl = document.getElementById('py-editor-status');
+        if (statusEl) statusEl.textContent = '\u2717 Error \u2014 ' + msg.split('\n')[0].substring(0, 60);
+      }
+    });
 }
 
 // ── EDITOR MODAL (nano) ────────────────────────────────────────────
@@ -2319,7 +2379,30 @@ function closeTerminal() {
   var pEl3 = document.getElementById('t-prompt');
   if (pEl3) pEl3.textContent = 'mario@portfolio:~$ ';
   var term = document.getElementById('ml-terminal');
-  if (term) term.classList.remove('t-open');
+  if (term) {
+    term.classList.remove('t-open');
+    // Resetear tamaño manual del teclado virtual
+    term.style.height = '';
+    term.style.top    = '';
+    term.style.left   = '';
+    term.style.width  = '';
+  }
+}
+
+// ── Terminal mobile: ajustar altura cuando el teclado virtual aparece ──
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', function() {
+    var term = document.getElementById('ml-terminal');
+    if (!term || !_termOpen) return;
+    var vv = window.visualViewport;
+    term.style.height = vv.height + 'px';
+    term.style.top    = vv.offsetTop + 'px';
+    term.style.left   = vv.offsetLeft + 'px';
+    term.style.width  = vv.width + 'px';
+    // Hacer scroll al input para que sea visible
+    var inp = document.getElementById('t-in-row');
+    if (inp) inp.scrollIntoView({ block: 'end' });
+  });
 }
 
 // Cerrar con botón rojo y ESC
@@ -2467,13 +2550,39 @@ function initMobileScrollHero() {
   // ya que en móvil sin split, stats están dentro del .profile
   // → dejarlos donde están en la jerarquía del DOM
 
-  // ── Blur en la 2ª tarjeta ──────────────────────────────
+  // ── Blur scroll-driven en TODAS las tarjetas ───────────
   var allCards = app.querySelectorAll('.link-card');
-  var peekBlurCard = allCards[1] || null; // 2ª card = peeking blurred
-  if (peekBlurCard) peekBlurCard.classList.add('mob-peek-blur');
-
   _mheroActive = true;
-  var peekUnblurred = false;
+
+  function _updateCardBlur() {
+    var viewH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    var cardH = allCards.length > 0 ? (allCards[0].offsetHeight || 70) : 70;
+    var blurZone = cardH * 3; // 3 alturas de card = zona de transición
+
+    for (var i = 0; i < allCards.length; i++) {
+      var card = allCards[i];
+      var rect = card.getBoundingClientRect();
+      var distBelow = rect.top - viewH; // negativo = visible, positivo = debajo
+
+      if (distBelow <= 0) {
+        // Tarjeta visible — sin blur
+        card.style.filter = '';
+        card.style.opacity = '';
+        card.style.pointerEvents = '';
+      } else if (distBelow >= blurZone) {
+        // Tarjeta bien debajo del viewport — blur completo
+        card.style.filter = 'blur(8px)';
+        card.style.opacity = '0.45';
+        card.style.pointerEvents = 'none';
+      } else {
+        // Zona de transición: des-blurear progresivamente
+        var ratio = distBelow / blurZone;
+        card.style.filter = 'blur(' + (ratio * 8).toFixed(1) + 'px)';
+        card.style.opacity = (1 - ratio * 0.55).toFixed(2);
+        card.style.pointerEvents = ratio > 0.7 ? 'none' : '';
+      }
+    }
+  }
 
   // ── Listener de scroll ─────────────────────────────────
   var _raf = false;
@@ -2483,26 +2592,36 @@ function initMobileScrollHero() {
     requestAnimationFrame(function() {
       _raf = false;
       var sy = window.pageYOffset || 0;
-      var maxShrink = 140; // px de scroll hasta tamaño mínimo
+      var maxShrink = 140;
       var ratio = Math.min(sy / maxShrink, 1);
-      var extra = Math.round((1 - ratio) * 34); // 34px → 0px extra
+      var extra = Math.round((1 - ratio) * 34);
       document.documentElement.style.setProperty('--mhero-extra', extra + 'px');
-
-      // Revelar la 2ª tarjeta borrosa cuando empieza el scroll
-      if (!peekUnblurred && sy > 12) {
-        peekUnblurred = true;
-        if (peekBlurCard) peekBlurCard.classList.remove('mob-peek-blur');
-      }
+      _updateCardBlur();
     });
   };
   window.addEventListener('scroll', _mheroScrollFn, { passive: true });
 
-  // Disparar una vez para estado inicial correcto
+  // Disparar una vez para estado inicial
   _mheroScrollFn();
 }
 
 // Arrancar hero en carga inicial
 setTimeout(initMobileScrollHero, 120);
+
+// ── PYTHON CHIP: glitch aleatorio cada 7-15s para insinuar el easter egg ──
+(function _schedulePyChipGlitch() {
+  var delay = 7000 + Math.random() * 8000; // 7-15 segundos
+  setTimeout(function() {
+    var chips = document.querySelectorAll('.skill-chip');
+    for (var i = 0; i < chips.length; i++) {
+      if (chips[i].textContent.indexOf('Python') !== -1) {
+        _scramble(chips[i]); // usa la misma función de letras locas
+        break;
+      }
+    }
+    _schedulePyChipGlitch(); // reprogramar
+  }, delay);
+})();
 
 // ══════════════════════════════════════════════════════
 // ── SCROLL REVEAL ──
