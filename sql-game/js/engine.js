@@ -657,35 +657,35 @@ class GameEngine {
     } else if (this.currentLevel === 1) {
       const hints = {
         'L1M1': [
-          '[ Vega ] *suspira* Solo por esta vez...',
+          '[ Ing. Luis ] *suspira* Solo por esta vez...',
           '  Estructura: SELECT nombre, cargo FROM empleados WHERE activo = 1;',
           '',
           'La próxima, lo resuelves tú.',
         ],
         'L1M2': [
-          '[ Vega ] Te doy solo la idea:',
+          '[ Ing. Luis ] Te doy solo la idea:',
           '  Usa WHERE con la columna "turno" y filtra por \'noche\'.',
           '  No olvides filtrar también por activo = 1.',
         ],
         'L1M3': [
-          '[ Vega ] Una sola pista:',
+          '[ Ing. Luis ] Una sola pista:',
           '  COUNT(*) en tabla paradas, con WHERE tipo_parada = \'falla\'.',
         ],
         'L1M4': [
-          '[ Vega ] Te lo digo una sola vez:',
+          '[ Ing. Luis ] Te lo digo una sola vez:',
           '  ORDER BY eficiencia_porcentaje ASC, tabla produccion_diaria o lineas_produccion.',
         ],
         'L1M5': [
-          '[ Vega ] JOIN. Eso es todo lo que te digo.',
+          '[ Ing. Luis ] JOIN. Eso es todo lo que te digo.',
           '  Tabla paradas + tabla maquinas, usando maquina_id como llave.',
         ],
       };
-      const h = hints[mission ? mission.id : ''] || ['[ Vega ] No tengo pistas para esta misión. Piensa.'];
+      const h = hints[mission ? mission.id : ''] || ['[ Ing. Luis ] No tengo pistas para esta misión. Piensa.'];
       h.forEach(l => this.terminal.print(l, l.startsWith('  ') ? 'tline-warn' : 'tline-info'));
 
     // ── Nivel 2+: Sin pistas ──────────────────────────────────────────────────
     } else if (this.currentLevel === 2) {
-      this.terminal.print('[ Vega ] ¿Me estás pidiendo una pista? Para eso no te contrataron.', 'tline-err');
+      this.terminal.print('[ Ing. Luis ] ¿Me estás pidiendo una pista? Para eso no te contrataron.', 'tline-err');
       this.terminal.print('         Revisa la misión y piensa antes de ejecutar.', 'tline-info');
       this.character.react('¿Una pista? Serio?', 'STRICT', 3000);
     } else {

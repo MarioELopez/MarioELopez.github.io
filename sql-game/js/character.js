@@ -29,7 +29,7 @@ class Character {
   // Sprites disponibles
   static SPRITES = {
     F1: { name: 'Neysa',          cssClass: 'sprite-f1' },
-    F2: { name: 'Ing. Vega',      cssClass: 'sprite-f2' },
+    F2: { name: 'Ing. Luis Salas', cssClass: 'sprite-f2' },
     A1: { name: 'Gerencia',       cssClass: 'sprite-a1' },
   };
 
@@ -116,6 +116,12 @@ class Character {
     this.spriteEl.classList.add(cls);
   }
 
+  // Marca el panel lateral para que CSS haga el toggle info↔diálogo
+  _setPanelDialog(active) {
+    const panel = document.getElementById('character-panel');
+    if (panel) panel.classList.toggle('dialog-active', active);
+  }
+
   // Encola una lista de líneas de diálogo y las muestra en secuencia
   speak(lines, options = {}) {
     if (!Array.isArray(lines)) lines = [lines];
@@ -123,6 +129,7 @@ class Character {
     this.onDialogEnd = options.onEnd || null;
     if (options.state) this.setState(options.state);
     this.boxEl.classList.remove('hidden');
+    this._setPanelDialog(true);
     this._showNext();
   }
 
@@ -180,6 +187,7 @@ class Character {
 
   _endDialog() {
     this.boxEl.classList.add('hidden');
+    this._setPanelDialog(false);
     this.setState('NEUTRAL');
     const cb = this.onDialogEnd;
     this.onDialogEnd = null;
@@ -193,8 +201,10 @@ class Character {
     this.nameEl.textContent = Character.SPRITES[this.currentSprite]?.name || '';
     this.continueEl.textContent = '';
     this.boxEl.classList.remove('hidden');
+    this._setPanelDialog(true);
     setTimeout(() => {
       this.boxEl.classList.add('hidden');
+      this._setPanelDialog(false);
       this.setState('NEUTRAL');
     }, durationMs);
   }
@@ -205,9 +215,11 @@ class Character {
     this.textEl.textContent = text;
     this.continueEl.textContent = '— Pulsa ENTER —';
     this.boxEl.classList.remove('hidden');
+    this._setPanelDialog(true);
     this.onDialogEnd = onDismiss;
     const handler = () => {
       this.boxEl.classList.add('hidden');
+      this._setPanelDialog(false);
       this.setState('NEUTRAL');
       document.removeEventListener('keydown', keyHandler);
       this.boxEl.removeEventListener('click', handler);
@@ -222,6 +234,7 @@ class Character {
 
   hide() {
     this.boxEl.classList.add('hidden');
+    this._setPanelDialog(false);
     this.setState('NEUTRAL');
     if (this.typeInterval) {
       clearInterval(this.typeInterval);

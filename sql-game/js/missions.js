@@ -18,15 +18,15 @@ const MISSIONS = [
     title: 'Conoce el terreno',
     intro: [
       '¡Hola! Soy Neysa. Supervisora de turno. Sí, ya sé, no me veo como supervisora — pero aquí estoy.',
-      'Bienvenido a la planta. Antes de que el Ing. Vega te empiece a bombardear con pedidos, necesitas conocer el sistema.',
+      'Bienvenido a la planta. Antes de que el Ing. Luis te empiece a bombardear con pedidos, necesitas conocer el sistema.',
       'Primero lo primero: dime qué tablas tenemos en esta base de datos.',
-      'Si no tienes idea de cómo hacerlo, escribe  pista  en la terminal. Sin drama, todos empezamos desde cero.',
+      'Si en algún momento no sabes qué hacer, puedes pedirme ayuda escribiendo  pista  en la terminal.',
     ],
     successDialog: [
       '¡Sí! Eso era exactamente. Ya sé que sabes dónde estás parado.',
-      'Bien, sigamos antes de que Vega nos encuentre aquí charlando.',
+      'Bien, sigamos antes de que el Ing. Luis nos encuentre aquí charlando.',
     ],
-    failDialog: 'Mmm, eso no era lo que necesitaba. Muéstrame las tablas del sistema. Escribe  pista  si no sabes cómo.',
+    failDialog: 'Mmm, eso no era lo que necesitaba. Muéstrame las tablas del sistema.',
     successCondition: {
       check: (type, sql, result) => {
         const u = sql.toUpperCase().trim();
@@ -46,18 +46,23 @@ const MISSIONS = [
       '¡Bien! Ya sabes que existen las tablas. Un paso más.',
       'Ahora necesito que conozcas la estructura de la tabla de empleados antes de tocarla.',
       'En esta planta hay una regla: no se toca nada sin conocerlo primero. La aprendí a las malas.',
-      'Dame las columnas y sus tipos. Solo eso. Escribe  pista  si necesitas el comando exacto.',
+      'Dame las columnas y sus tipos. Solo eso.',
     ],
     successDialog: [
       '¡Ahí está! Eso es exactamente lo que necesitaba.',
       'Conocer antes de tocar. Buena costumbre. De verdad.',
     ],
-    failDialog: 'Ey, te pedí la estructura, no los datos. Son cosas distintas. Escribe  pista  si no sabes cómo.',
+    failDialog: 'Ey, te pedí la estructura, no los datos. Son cosas distintas.',
     successCondition: {
       check: (type, sql, result) => {
         const u = sql.toUpperCase().trim();
-        return (type === 'DESCRIBE' ||
-                (type === 'PRAGMA' && u.includes('TABLE_INFO') && u.includes('EMPLEADOS')));
+        // Requiere que: (1) sea un comando de estructura, (2) apunte a 'empleados',
+        // (3) la tabla exista y haya devuelto columnas reales (rows no vacío).
+        const hasRows = result && result.rows && result.rows.length > 0;
+        return hasRows && (
+          (type === 'DESCRIBE' && u.includes('EMPLEADOS')) ||
+          (type === 'PRAGMA' && u.includes('TABLE_INFO') && u.includes('EMPLEADOS'))
+        );
       }
     },
     trapPossible: false,
@@ -69,16 +74,15 @@ const MISSIONS = [
     character: 'F1',
     title: 'Vista previa inteligente',
     intro: [
-      'Oye, escucha. El Ing. Vega es... intenso. Tipo, muy intenso.',
+      'Oye, escucha. El Ing. Luis es... intenso. Tipo, muy intenso.',
       'En cualquier momento te va a pedir datos de producción y si traes 5.000 filas de golpe, te va a mirar feo.',
-      'Practica aquí conmigo: dame una muestra de la tabla de producción diaria.',
-      'Solo una muestra. No el dump completo. LIMIT es tu mejor amigo. Escribe  pista  si lo necesitas.',
+      'Practica aquí conmigo: dame una muestra de la tabla de producción diaria. Solo una muestra.',
     ],
     successDialog: [
       '¡Sí! Exactamente eso. Rápido, limpio, sin inundar la pantalla.',
-      'Con esa costumbre vas a sobrevivir con Vega. O al menos lo vas a intentar jaja.',
+      'Con esa costumbre vas a sobrevivir con el Ing. Luis. O al menos lo vas a intentar jaja.',
     ],
-    failDialog: '¡Ey! ¿Para qué trajiste TODOS los registros? Te pedí una muestra. Usa LIMIT. Escribe  pista  si no sabes cómo.',
+    failDialog: '¡Ey! ¿Para qué trajiste TODOS los registros? Te pedí una muestra, no todo el historial.',
     successCondition: {
       check: (type, sql, result) => {
         const u = sql.toUpperCase();
@@ -93,7 +97,7 @@ const MISSIONS = [
 
   // ===========================================================
   // NIVEL 1 — CONSULTAS BÁSICAS
-  // Personaje: Ing. Vega (F2) — Gerente de planta, impaciente
+  // Personaje: Ing. Luis Salas (F2) — Gerente de planta, impaciente
   // ===========================================================
 
   {
@@ -102,13 +106,13 @@ const MISSIONS = [
     character: 'F2',
     title: 'Lista de empleados activos',
     intro: [
-      'Soy el Ing. Vega. Gerente de planta.',
+      'Soy el Ing. Luis Salas. Gerente de planta.',
       'Neysa me dijo que pasaste el primer día. Bien.',
       'Ahora trabaja de verdad. Necesito la lista de empleados activos.',
       'Solo nombre y cargo. No me traigas todas las columnas. Ya sé lo que hay en esa tabla.',
     ],
     successDialog: ['Correcto. Columnas específicas, sin descargar basura innecesaria.'],
-    failDialog: '¿Por qué me traes todas las columnas? Solo pedí nombre y cargo. Escribe  pista  si lo necesitas.',
+    failDialog: '¿Por qué me traes todas las columnas? Solo pedí nombre y cargo.',
     successCondition: {
       check: (type, sql, result) => {
         const u = sql.toUpperCase();
@@ -131,7 +135,7 @@ const MISSIONS = [
       'Hay problemas con la Línea 2 en ese turno y necesito saber quién está ahí.',
     ],
     successDialog: ['Bien. ¿Ves lo rápido que fue con un filtro correcto?'],
-    failDialog: 'Eso no es lo que necesito. Filtra por turno de noche, no me traigas a todos. Escribe  pista  si lo necesitas.',
+    failDialog: 'Eso no es lo que necesito. Filtra por turno de noche, no me traigas a todos.',
     successCondition: {
       check: (type, sql, result) => {
         const u = sql.toUpperCase();
@@ -153,7 +157,7 @@ const MISSIONS = [
       'Solo el número. No me traigas la lista completa.',
     ],
     successDialog: ['Eso es lo que necesitaba. Un número concreto.'],
-    failDialog: 'Te pedí un número, no una lista. Existe COUNT() para eso. Escribe  pista  si no lo recuerdas.',
+    failDialog: 'Te pedí un número, no una lista. COUNT() es lo que necesitas.',
     successCondition: {
       check: (type, sql, result) => {
         const u = sql.toUpperCase();
@@ -175,7 +179,7 @@ const MISSIONS = [
       'Necesito saber cuál es la que más problemas tiene.',
     ],
     successDialog: ['Ahora tengo algo con qué entrar a la reunión.'],
-    failDialog: 'El dato sin orden no me sirve. Necesito que esté ordenado de peor a mejor. Escribe  pista  si lo necesitas.',
+    failDialog: 'El dato sin orden no me sirve. Necesito que esté ordenado de peor a mejor.',
     successCondition: {
       check: (type, sql, result) => {
         const u = sql.toUpperCase();
@@ -197,7 +201,7 @@ const MISSIONS = [
       'En una reunión con gerencia, los IDs no significan nada.',
     ],
     successDialog: ['Así se trabaja. Datos que cualquiera puede leer.'],
-    failDialog: 'Solo me trajiste IDs de máquina. Necesito el nombre. Cruza las tablas. Escribe  pista  si no sabes cómo hacer el JOIN.',
+    failDialog: 'Solo me trajiste IDs de máquina. Necesito el nombre. Cruza las tablas..',
     successCondition: {
       check: (type, sql, result) => {
         const u = sql.toUpperCase();
@@ -213,7 +217,7 @@ const MISSIONS = [
 
   // ===========================================================
   // NIVEL 2 — OPERACIONES: INSERT, UPDATE, DELETE con cuidado
-  // Personaje: Ing. Vega (F2) — Ahora más exigente
+  // Personaje: Ing. Luis Salas (F2) — Ahora más exigente
   // ===========================================================
 
   {

@@ -109,7 +109,7 @@ const AchievementSystem = (() => {
       id: 'SELECT_STAR_STORM',
       icon: '⭐',
       name: 'Lluvia de columnas',
-      desc: 'Usaste SELECT * 5 veces en una misión. El Ing. Vega suspiró.',
+      desc: 'Usaste SELECT * 5 veces en una misión. El Ing. Luis suspiró.',
     },
 
     // --- Eficiencia ---
