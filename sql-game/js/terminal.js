@@ -106,7 +106,8 @@ class Terminal {
     this._append('─'.repeat(60), 'tline-sep');
   }
 
-  // Renderiza resultados SQL como tabla ASCII
+  // Renderiza resultados SQL como tabla ASCII con scroll horizontal
+  // Las tablas anchas se desplazan lateralmente en lugar de partir líneas.
   printTable(columns, rows) {
     if (!columns || columns.length === 0) {
       this.printInfo('(sin columnas)');
@@ -117,31 +118,45 @@ class Terminal {
       return;
     }
 
-    // Calcular ancho de cada columna
+    // Calcular ancho de cada columna (sin truncar — scroll se encarga del overflow)
     const widths = columns.map((col, i) => {
       const dataMax = rows.reduce((m, row) => {
         const v = row[i] !== null && row[i] !== undefined ? String(row[i]) : 'NULL';
         return Math.max(m, v.length);
       }, 0);
-      return Math.min(Math.max(col.length, dataMax), 40); // max 40 chars
+      return Math.max(col.length, dataMax);
     });
 
     const sep  = '+' + widths.map(w => '-'.repeat(w + 2)).join('+') + '+';
-    const head = '|' + columns.map((c, i) => ` ${c.substring(0,widths[i]).padEnd(widths[i])} `).join('|') + '|';
+    const head = '|' + columns.map((c, i) => ` ${c.padEnd(widths[i])} `).join('|') + '|';
 
-    this._append(sep,  'tline-tbl');
-    this._append(head, 'tline-tbl-h');
-    this._append(sep,  'tline-tbl');
+    // Wrapper con scroll horizontal — evita el word-wrap que deforma las tablas
+    const wrapper = document.createElement('div');
+    wrapper.className = 'tbl-scroll';
+
+    const addLine = (text, cls) => {
+      const el = document.createElement('div');
+      el.className = `tline ${cls}`;
+      el.textContent = text;
+      wrapper.appendChild(el);
+    };
+
+    addLine(sep,  'tline-tbl');
+    addLine(head, 'tline-tbl-h');
+    addLine(sep,  'tline-tbl');
 
     rows.forEach(row => {
       const line = '|' + row.map((v, i) => {
         const s = v !== null && v !== undefined ? String(v) : 'NULL';
-        return ` ${s.substring(0, widths[i]).padEnd(widths[i])} `;
+        return ` ${s.padEnd(widths[i])} `;
       }).join('|') + '|';
-      this._append(line, 'tline-tbl');
+      addLine(line, 'tline-tbl');
     });
 
-    this._append(sep, 'tline-tbl');
+    addLine(sep, 'tline-tbl');
+
+    this.output.appendChild(wrapper);
+    this.output.scrollTop = this.output.scrollHeight;
     this.printInfo(`${rows.length} row(s) in set`);
   }
 

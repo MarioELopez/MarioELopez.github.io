@@ -282,12 +282,20 @@ function _activateGameMode() {
       '<div id="level-badge">NIVEL 0</div>' +
       '<div id="mission-title">Iniciando sistema...</div>' +
       '<div id="mission-progress"><div id="mission-dots"></div></div>' +
+      /* Botones compactos visibles solo en móvil */
+      '<div id="mobile-action-btns">' +
+        '<button id="hint-btn-m" title="Ayuda de Neysa">\uD83D\uDCA1 Ayuda</button>' +
+        '<button id="orden-btn-m" title="Repetir la orden">\uD83D\uDCCB Orden</button>' +
+      '</div>' +
     '</div>' +
     '<div id="character-area">' +
       '<div id="character-sprite" class="sprite-f1 state-neutral"></div>' +
     '</div>' +
     '<div id="dialog-box" class="hidden">' +
-      '<div id="dialog-character-name">Supervisora</div>' +
+      '<div id="dialog-header">' +
+        '<div id="dialog-character-name">Neysa</div>' +
+        '<div id="dialog-character-role">Supervisora</div>' +
+      '</div>' +
       '<div id="dialog-text"></div>' +
       '<div id="dialog-continue">\u25bc</div>' +
     '</div>' +
@@ -296,7 +304,8 @@ function _activateGameMode() {
       '<div class="stat"><span class="stat-label">Precisi\u00f3n</span><span class="stat-value" id="accuracy">\u2014</span></div>' +
     '</div>' +
     '<div id="hint-btn-panel">' +
-      '<button id="hint-btn" title="Pedir pista a Neysa">\uD83D\uDCA1 Pedir pista</button>' +
+      '<button id="hint-btn" title="Pedir ayuda a Neysa">\uD83D\uDCA1 Ayuda</button>' +
+      '<button id="orden-btn" title="Repetir la orden actual">\uD83D\uDCCB Orden</button>' +
     '</div>' +
     '<div id="achievements-panel">' +
       '<div id="achievements-title">Logros</div>' +
@@ -416,16 +425,22 @@ function _activateGameMode() {
     _sqlGameEngine = engine;
     engine.start();
 
-    // Botón de pista visual — delega al sistema de pistas del engine
-    var hintBtn = document.getElementById('hint-btn');
-    if (hintBtn) {
-      hintBtn.addEventListener('click', function() {
-        if (_sqlGameEngine) {
-          gameTerminal.printCommand('pista');
-          _sqlGameEngine._handleSystemCommand('pista');
-        }
-      });
+    // ── Botones del panel lateral ─────────────────────────────────────────────
+    // Llaman al engine directamente — sin imprimir nada en terminal.
+    // La respuesta llega como diálogo del personaje.
+    function _engineCmd(cmd) {
+      if (_sqlGameEngine) _sqlGameEngine._handleSystemCommand(cmd);
     }
+
+    var hintBtn  = document.getElementById('hint-btn');
+    var ordenBtn = document.getElementById('orden-btn');
+    var hintBtnM  = document.getElementById('hint-btn-m');
+    var ordenBtnM = document.getElementById('orden-btn-m');
+
+    if (hintBtn)  hintBtn.addEventListener('click',  function() { _engineCmd('pista'); });
+    if (ordenBtn) ordenBtn.addEventListener('click', function() { _engineCmd('orden'); });
+    if (hintBtnM)  hintBtnM.addEventListener('click',  function() { _engineCmd('pista'); });
+    if (ordenBtnM) ordenBtnM.addEventListener('click', function() { _engineCmd('orden'); });
 
   } catch(err) {
     _tPrint(_tLine('Error iniciando el juego: ' + (err.message || err), 'te'));
