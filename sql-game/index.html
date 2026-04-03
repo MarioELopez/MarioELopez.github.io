@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SQL Planta — El Juego</title>
+  <link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+
+<div id="game-container">
+
+  <!-- =============================================
+       PANEL IZQUIERDO — Terminal
+       ============================================= -->
+  <div id="terminal-panel">
+
+    <div id="terminal-header">
+      <div class="terminal-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span id="terminal-title">Sistema de Gestión Industrial — PLANTADB v2.4.1</span>
+    </div>
+
+    <div id="terminal-output"></div>
+
+    <div id="terminal-input-line">
+      <span id="terminal-prompt">planta@sistema:~$</span>
+      <input
+        type="text"
+        id="terminal-input"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+        placeholder="Escribe start para comenzar..."
+      >
+    </div>
+
+  </div>
+
+  <!-- =============================================
+       PANEL DERECHO — Personaje + Info
+       ============================================= -->
+  <div id="character-panel">
+
+    <div id="mission-info">
+      <div id="level-badge">NIVEL 0</div>
+      <div id="mission-title">Iniciando sistema...</div>
+      <div id="mission-progress">
+        <div id="mission-dots"></div>
+      </div>
+    </div>
+
+    <div id="character-area">
+      <div id="character-sprite" class="sprite-f1 state-neutral"></div>
+    </div>
+
+    <div id="dialog-box" class="hidden">
+      <div id="dialog-character-name">Supervisora</div>
+      <div id="dialog-text"></div>
+      <div id="dialog-continue">▼</div>
+    </div>
+
+    <div id="stats-panel">
+      <div class="stat">
+        <span class="stat-label">Puntos</span>
+        <span class="stat-value" id="score">0</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Precisión</span>
+        <span class="stat-value" id="accuracy">—</span>
+      </div>
+    </div>
+
+    <div id="achievements-panel">
+      <div id="achievements-title">Logros</div>
+      <div id="achievements-list"></div>
+    </div>
+
+  </div>
+
+  <!-- =============================================
+       OVERLAY — Simulador de peso
+       ============================================= -->
+  <div id="weight-overlay" class="hidden">
+    <div id="weight-content">
+      <div id="weight-title">Ejecutando consulta...</div>
+      <div id="weight-progress-bar">
+        <div id="weight-progress-fill"></div>
+      </div>
+      <div id="weight-stats">
+        <span id="weight-rows">Filas procesadas: 0</span>
+        <span id="weight-memory">Memoria: 0 MB</span>
+      </div>
+      <div id="weight-message"></div>
+    </div>
+  </div>
+
+  <!-- =============================================
+       POPUP — Logro desbloqueado
+       ============================================= -->
+  <div id="achievement-popup" class="hidden">
+    <div id="achievement-icon">🏆</div>
+    <div id="achievement-content">
+      <div id="achievement-label">LOGRO DESBLOQUEADO</div>
+      <div id="achievement-name"></div>
+      <div id="achievement-desc"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- =============================================
+     Scripts — orden de carga importa
+     ============================================= -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>
+<script src="js/analyzer.js"></script>
+<script src="js/simulator.js"></script>
+<script src="js/terminal.js"></script>
+<script src="js/character.js"></script>
+<script src="js/achievements.js"></script>
+<script src="js/missions.js"></script>
+<script src="js/validator.js"></script>
+<script src="js/db.js"></script>
+<script src="js/engine.js"></script>
+
+<script>
+  // ---- Inicialización ----
+  document.addEventListener('DOMContentLoaded', () => {
+
+    // Instanciar Terminal
+    const terminal = new Terminal(
+      document.getElementById('terminal-output'),
+      document.getElementById('terminal-input'),
+      document.getElementById('terminal-prompt')
+    );
+
+    // Instanciar Personaje
+    const character = new Character(
+      document.getElementById('character-sprite'),
+      document.getElementById('dialog-character-name'),
+      document.getElementById('dialog-text'),
+      document.getElementById('dialog-box'),
+      document.getElementById('dialog-continue')
+    );
+
+    // Inicializar Sistema de Logros
+    AchievementSystem.init({
+      popupEl:   document.getElementById('achievement-popup'),
+      popupIcon: document.getElementById('achievement-icon'),
+      popupName: document.getElementById('achievement-name'),
+      popupDesc: document.getElementById('achievement-desc'),
+    });
+
+    // Registrar logros desbloqueados en el panel lateral
+    const originalUnlock = AchievementSystem.unlock.bind(AchievementSystem);
+    // (el panel se actualiza vía check/unlock internamente — extensible aquí)
+
+    // Elementos del simulador de peso
+    const simElements = {
+      overlayEl:  document.getElementById('weight-overlay'),
+      titleEl:    document.getElementById('weight-title'),
+      fillEl:     document.getElementById('weight-progress-fill'),
+      rowsEl:     document.getElementById('weight-rows'),
+      memoryEl:   document.getElementById('weight-memory'),
+      messageEl:  document.getElementById('weight-message'),
+    };
+
+    // Instanciar y arrancar el motor
+    const engine = new GameEngine({
+      terminal,
+      character,
+      simElements,
+      scoreEl:        document.getElementById('score'),
+      accuracyEl:     document.getElementById('accuracy'),
+      levelBadgeEl:   document.getElementById('level-badge'),
+      missionTitleEl: document.getElementById('mission-title'),
+      dotsEl:         document.getElementById('mission-dots'),
+    });
+
+    engine.start();
+
+    // Dar foco al input al hacer click en la terminal
+    document.getElementById('terminal-panel').addEventListener('click', () => {
+      document.getElementById('terminal-input').focus();
+    });
+
+  });
+</script>
+
+</body>
+</html>
