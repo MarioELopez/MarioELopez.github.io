@@ -116,6 +116,27 @@
 .tline-tbl   { color: var(--green-dim); font-size: 12px; letter-spacing: 0; }
 .tline-tbl-h { color: var(--green); font-size: 12px; font-weight: bold; letter-spacing: 0; }
 
+/* Contenedor de tabla con scroll horizontal.
+   Evita que filas largas rompan en varias líneas deformando la tabla. */
+.tbl-scroll {
+  overflow-x: auto;
+  width: 100%;
+  max-width: 100%;
+}
+.tbl-scroll .tline {
+  white-space: pre;
+  word-break: normal;
+  overflow: visible;
+  display: block;
+  min-width: max-content;
+}
+/* Scrollbar de la tabla (webkit) */
+.tbl-scroll::-webkit-scrollbar        { height: 4px; }
+.tbl-scroll::-webkit-scrollbar-track  { background: transparent; }
+.tbl-scroll::-webkit-scrollbar-thumb  { background: var(--green-dark); border-radius: 2px; }
+/* Scrollbar de la tabla (Firefox) */
+.tbl-scroll { scrollbar-width: thin; scrollbar-color: var(--green-dark) transparent; }
+
 /* Línea de input */
 #terminal-input-line {
   display: flex;
@@ -160,7 +181,7 @@
   background: var(--bg-panel);
   padding: 14px 12px;
   gap: 12px;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 /* Info de misión */
@@ -267,13 +288,32 @@
   flex-direction: column;
 }
 
-/* Scrollbar del dialog al estilo de la interfaz */
+/* Scrollbar del dialog — webkit (Chrome/Edge/Safari) */
 #dialog-box::-webkit-scrollbar          { width: 4px; }
 #dialog-box::-webkit-scrollbar-track   { background: var(--bg-dialog); }
 #dialog-box::-webkit-scrollbar-thumb   { background: var(--green-dark); border-radius: 2px; }
 #dialog-box::-webkit-scrollbar-thumb:hover { background: var(--green-dim); }
+/* Scrollbar del dialog — Firefox */
+#dialog-box { scrollbar-width: thin; scrollbar-color: var(--green-dark) var(--bg-dialog); }
+
+/* FIX: En desktop, .hidden usa visibility en vez de display:none para
+   mantener el espacio de 130px y evitar que los botones de abajo salten */
+#dialog-box.hidden {
+  visibility: hidden !important;
+  display: flex !important;
+  pointer-events: none !important;
+}
 
 #dialog-box:hover { border-color: var(--green); }
+
+/* Encabezado del cuadro de diálogo: nombre + cargo */
+#dialog-header {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 6px;
+  flex-shrink: 0;
+}
 
 #dialog-character-name {
   font-family: var(--font-ui);
@@ -281,9 +321,15 @@
   font-weight: bold;
   color: var(--green);
   letter-spacing: 0.08em;
-  margin-bottom: 6px;
   text-transform: uppercase;
-  flex-shrink: 0;
+}
+
+#dialog-character-role {
+  font-family: var(--font-ui);
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
 }
 
 #dialog-text {
@@ -336,17 +382,18 @@
   color: var(--green);
 }
 
-/* ---- Botón de pista ---- */
+/* ---- Botones de ayuda y orden (desktop) ---- */
 #hint-btn-panel {
   flex-shrink: 0;
   padding: 4px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
-#hint-btn {
+#hint-btn, #orden-btn {
   width: 100%;
   background: transparent;
-  border: 1px solid var(--amber);
-  color: var(--amber);
   font-family: var(--font-ui);
   font-size: 11px;
   font-weight: bold;
@@ -358,43 +405,121 @@
   text-align: center;
 }
 
-#hint-btn:hover {
-  background: var(--amber);
-  color: #000;
+#hint-btn {
+  border: 1px solid var(--amber);
+  color: var(--amber);
+}
+#hint-btn:hover  { background: var(--amber); color: #000; }
+#hint-btn:active { opacity: 0.75; }
+
+#orden-btn {
+  border: 1px solid var(--blue);
+  color: var(--blue);
+}
+#orden-btn:hover  { background: var(--blue); color: #000; }
+#orden-btn:active { opacity: 0.75; }
+
+/* ---- Botones de acción móvil (dentro de #mission-info) ---- */
+#mobile-action-btns {
+  display: none; /* visible solo en @media móvil */
 }
 
-#hint-btn:active {
-  opacity: 0.75;
-}
-
-/* ---- Logros en panel lateral ---- */
-#achievements-panel {
+#hint-btn-m, #orden-btn-m {
   flex: 1;
-  overflow-y: auto;
-}
-
-#achievements-title {
+  background: transparent;
   font-family: var(--font-ui);
   font-size: 10px;
   font-weight: bold;
-  color: var(--text-dim);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  margin-bottom: 8px;
+  padding: 3px 6px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+  -webkit-tap-highlight-color: transparent;
 }
+#hint-btn-m  { border: 1px solid var(--amber); color: var(--amber); }
+#hint-btn-m:hover  { background: var(--amber);  color: #000; }
+#orden-btn-m { border: 1px solid var(--blue);  color: var(--blue); }
+#orden-btn-m:hover { background: var(--blue);   color: #000; }
 
-.achievement-item {
+/* ---- Botón de logros en panel lateral ---- */
+#logros-btn {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--green-dark);
+  color: var(--text-dim);
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 5px 8px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color var(--transition), color var(--transition);
+}
+#logros-btn:hover { border-color: var(--amber); color: var(--amber); }
+
+/* ---- Modal de logros ---- */
+#logros-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 5px 0;
-  border-bottom: 1px solid var(--border);
-  animation: achieve-in 0.3s ease;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(2px);
 }
-
-.achievement-item .ach-icon { font-size: 18px; flex-shrink: 0; }
-.achievement-item .ach-name { font-size: 11px; color: var(--green); font-weight: bold; }
-.achievement-item .ach-desc { font-size: 10px; color: var(--text-dim); line-height: 1.3; }
+#logros-modal.hidden { display: none !important; }
+#logros-modal-content {
+  background: #0d1a0d;
+  border: 1px solid var(--green-dark);
+  border-radius: 8px;
+  padding: 20px 24px;
+  min-width: 320px;
+  max-width: 420px;
+  max-height: 70vh;
+  overflow-y: auto;
+  box-shadow: 0 0 40px rgba(0, 255, 65, 0.1);
+}
+#logros-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+#logros-modal-title {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--green);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+#logros-modal-close {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+#logros-modal-close:hover { color: var(--green); }
+#logros-modal-list { display: flex; flex-direction: column; gap: 10px; }
+.logros-modal-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.logros-modal-item:last-child { border-bottom: none; }
+.logros-modal-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+.logros-modal-name { font-size: 12px; font-weight: bold; color: var(--green); line-height: 1.3; }
+.logros-modal-desc { font-size: 10px; color: var(--text-dim); line-height: 1.4; margin-top: 2px; }
+#logros-modal-empty { font-size: 11px; color: var(--text-dim); text-align: center; padding: 20px 0; }
 
 /* ============================================================
    OVERLAY — Simulador de peso
@@ -483,7 +608,7 @@
   position: fixed;
   top: 16px;
   right: 16px;
-  z-index: 200;
+  z-index: 9000;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -578,6 +703,58 @@
 @keyframes popup-slide-out {
   from { opacity: 1; transform: translateX(0); }
   to   { opacity: 0; transform: translateX(60px); }
+}
+
+/* ---- Efecto Glitch (easter egg DELETE sin WHERE) ---- */
+@keyframes glitch-1 {
+  0%         { clip-path: inset(20% 0 60% 0); transform: translate(-4px, 0); }
+  20%        { clip-path: inset(60% 0 10% 0); transform: translate(4px, 0); }
+  40%        { clip-path: inset(40% 0 30% 0); transform: translate(-2px, 2px); }
+  60%        { clip-path: inset(10% 0 70% 0); transform: translate(3px, -1px); }
+  80%        { clip-path: inset(70% 0 5% 0);  transform: translate(-3px, 1px); }
+  100%       { clip-path: inset(20% 0 60% 0); transform: translate(0, 0); }
+}
+@keyframes glitch-2 {
+  0%         { clip-path: inset(50% 0 30% 0); transform: translate(4px, 0); filter: hue-rotate(120deg); }
+  25%        { clip-path: inset(10% 0 65% 0); transform: translate(-3px, 2px); filter: hue-rotate(240deg); }
+  50%        { clip-path: inset(80% 0 5% 0);  transform: translate(2px, -2px); filter: hue-rotate(0deg); }
+  75%        { clip-path: inset(30% 0 50% 0); transform: translate(-4px, 1px); filter: hue-rotate(180deg); }
+  100%       { clip-path: inset(50% 0 30% 0); transform: translate(0, 0); filter: hue-rotate(90deg); }
+}
+@keyframes glitch-flicker {
+  0%, 100%   { opacity: 1; }
+  10%        { opacity: 0.85; }
+  20%        { opacity: 1; }
+  50%        { opacity: 0.9; }
+  55%        { opacity: 1; }
+  80%        { opacity: 0.88; }
+}
+
+.glitch-active {
+  animation: glitch-flicker 0.3s ease infinite;
+  position: relative;
+}
+.glitch-active::before,
+.glitch-active::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: inherit;
+  pointer-events: none;
+  z-index: 9998;
+}
+.glitch-active::before {
+  animation: glitch-1 0.25s steps(1) infinite;
+  background: rgba(255, 0, 60, 0.08);
+}
+.glitch-active::after {
+  animation: glitch-2 0.3s steps(1) infinite;
+  background: rgba(0, 255, 65, 0.06);
+}
+/* Scanline de glitch extra sobre el terminal */
+.glitch-active #t-out {
+  filter: contrast(1.1) saturate(0.7);
+  animation: glitch-flicker 0.15s ease infinite;
 }
 
 /* ---- Scanline retro opcional ---- */
@@ -681,8 +858,22 @@
   .stat-label   { font-size: 8px; }
   .stat-value   { font-size: 13px; }
 
-  #hint-btn-panel { display: none; } /* en móvil el hint se pide en la terminal */
-  #achievements-panel { display: none !important; }
+  /* En móvil los botones compactos van dentro de #mission-info */
+  #hint-btn-panel   { display: none !important; }
+  #logros-btn       { display: none !important; }
+  #mobile-action-btns {
+    display: flex !important;
+    gap: 4px;
+    margin-top: 4px;
+    flex-wrap: nowrap;
+  }
+
+  /* En móvil, revertir el fix de desktop — aquí el dialog no debe ocupar espacio */
+  #dialog-box.hidden {
+    display: none !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
 
   /* Dialog oculto en estado por defecto (además de la clase .hidden) */
   #dialog-box {
@@ -705,10 +896,11 @@
   #dialog-continue       { font-size: 10px; margin-top: 4px; }
 
   /* ── Estado dialog-active: personaje hablando ───────────────────────────
-     Se oculta info/stats y se muestra el dialog junto al sprite */
-  #character-panel.dialog-active #mission-info  { display: none; }
-  #character-panel.dialog-active #stats-panel   { display: none; }
-  #character-panel.dialog-active #dialog-box    { display: flex !important; }
+     Se oculta info/stats/botones y se muestra el dialog junto al sprite */
+  #character-panel.dialog-active #mission-info      { display: none; }
+  #character-panel.dialog-active #stats-panel       { display: none; }
+  #character-panel.dialog-active #mobile-action-btns{ display: none; }
+  #character-panel.dialog-active #dialog-box        { display: flex !important; }
 
   .tline { font-size: 11px; }
   #achievement-stack { max-width: 200px; right: 6px; top: 6px; }

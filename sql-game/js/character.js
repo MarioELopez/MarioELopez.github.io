@@ -23,14 +23,17 @@ class Character {
     this._lastAdvance   = 0;   // timestamp para debounce del Enter
     this._DEBOUNCE_MS   = 80;
 
+    this._reactTimer    = null; // timer para react() — cancelable para evitar solapamiento
+    this._typeOnComplete = null; // callback almacenado para _skipTyping
+
     this._bindContinue();
   }
 
   // Sprites disponibles
   static SPRITES = {
-    F1: { name: 'Neysa',          cssClass: 'sprite-f1' },
-    F2: { name: 'Ing. Luis Salas', cssClass: 'sprite-f2' },
-    A1: { name: 'Gerencia',       cssClass: 'sprite-a1' },
+    F1: { name: 'Neysa',           role: 'Supervisora',       cssClass: 'sprite-f1' },
+    F2: { name: 'Ing. Luis Salas', role: 'Gerente de Planta', cssClass: 'sprite-f2' },
+    A1: { name: 'Dir. Morales',    role: 'Director',          cssClass: 'sprite-a1' },
   };
 
   // Estados con sus clases CSS
@@ -99,6 +102,14 @@ class Character {
     }
   }
 
+  // Actualiza nombre y cargo en el cuadro de diálogo
+  _updateNameDisplay(info) {
+    if (!info) return;
+    if (this.nameEl) this.nameEl.textContent = info.name;
+    const roleEl = document.getElementById('dialog-character-role');
+    if (roleEl) roleEl.textContent = info.role || '';
+  }
+
   setSprite(spriteKey) {
     const data = Character.SPRITES[spriteKey];
     if (!data) return;
@@ -106,7 +117,7 @@ class Character {
     Object.values(Character.SPRITES).forEach(s =>
       this.spriteEl.classList.remove(s.cssClass));
     this.spriteEl.classList.add(data.cssClass);
-    this.nameEl.textContent = data.name;
+    this._updateNameDisplay(data);
   }
 
   setState(stateKey) {
@@ -149,8 +160,9 @@ class Character {
   }
 
   _typeText(text, onComplete) {
-    this.isTyping    = true;
-    this._currentLine = text;      // guardar línea completa para skip
+    this.isTyping     = true;
+    this._currentLine = text;       // guardar línea completa para skip
+    this._typeOnComplete = onComplete; // guardar callback para _skipTyping
     this.textEl.textContent  = '';
     this.continueEl.textContent = '';
     let i = 0;
@@ -158,11 +170,18 @@ class Character {
       if (i < text.length) {
         this.textEl.textContent += text[i];
         i++;
+        // Scroll dentro del contenedor de texto (no del box exterior)
+        this.textEl.scrollTop = this.textEl.scrollHeight;
       } else {
         clearInterval(this.typeInterval);
         this.typeInterval = null;
         this.isTyping = false;
+        this._typeOnComplete = null;
         onComplete && onComplete();
+        // Segundo scroll tras añadir el indicador de continuar
+        requestAnimationFrame(() => {
+          this.textEl.scrollTop = this.textEl.scrollHeight;
+        });
       }
     }, this.speedMs);
   }
@@ -174,11 +193,17 @@ class Character {
     }
     // Mostrar el texto completo de la línea actual (evita pantalla en blanco)
     this.textEl.textContent = this._currentLine;
+    // Scroll al final tras mostrar el texto completo
+    this.textEl.scrollTop = this.textEl.scrollHeight;
     this.isTyping = false;
     this.setState('NEUTRAL');
     this.continueEl.textContent = this.dialogQueue.length === 0
       ? '— Pulsa ENTER para continuar —'
       : '▼ más...';
+    // Ejecutar callback pendiente (ej. panic setupDismiss) si existe
+    const cb = this._typeOnComplete;
+    this._typeOnComplete = null;
+    cb && cb();
   }
 
   _advance() {
@@ -196,13 +221,19 @@ class Character {
 
   // Reacción rápida sin cola (para feedback de consultas)
   react(text, stateKey = 'NEUTRAL', durationMs = 4500) {
+    // Cancelar timer anterior para evitar solapamiento de estados
+    if (this._reactTimer) {
+      clearTimeout(this._reactTimer);
+      this._reactTimer = null;
+    }
     this.setState(stateKey);
     this.textEl.textContent = text;
-    this.nameEl.textContent = Character.SPRITES[this.currentSprite]?.name || '';
+    this._updateNameDisplay(Character.SPRITES[this.currentSprite]);
     this.continueEl.textContent = '';
     this.boxEl.classList.remove('hidden');
     this._setPanelDialog(true);
-    setTimeout(() => {
+    this._reactTimer = setTimeout(() => {
+      this._reactTimer = null;
       this.boxEl.classList.add('hidden');
       this._setPanelDialog(false);
       this.setState('NEUTRAL');
@@ -212,24 +243,33 @@ class Character {
   // Reacción de pánico (para catástrofes) — permanece hasta callback
   panic(text, onDismiss) {
     this.setState('PANIC');
-    this.textEl.textContent = text;
-    this.continueEl.textContent = '— Pulsa ENTER —';
     this.boxEl.classList.remove('hidden');
     this._setPanelDialog(true);
-    this.onDialogEnd = onDismiss;
-    const handler = () => {
-      this.boxEl.classList.add('hidden');
-      this._setPanelDialog(false);
-      this.setState('NEUTRAL');
-      document.removeEventListener('keydown', keyHandler);
-      this.boxEl.removeEventListener('click', handler);
-      onDismiss && onDismiss();
+    this.continueEl.textContent = '';
+
+    // setupDismiss: se llama al terminar de tipear (o al skipear)
+    const setupDismiss = () => {
+      // Restaurar estado PANIC en caso de que _skipTyping lo haya puesto en NEUTRAL
+      this.setState('PANIC');
+      this.continueEl.textContent = '— Pulsa ENTER —';
+      const handler = () => {
+        this.boxEl.classList.add('hidden');
+        this._setPanelDialog(false);
+        this.setState('NEUTRAL');
+        document.removeEventListener('keydown', keyHandler);
+        this.boxEl.removeEventListener('click', handler);
+        onDismiss && onDismiss();
+      };
+      const keyHandler = (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handler(); }
+      };
+      this.boxEl.addEventListener('click', handler, { once: true });
+      document.addEventListener('keydown', keyHandler, { once: true });
     };
-    const keyHandler = (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handler(); }
-    };
-    this.boxEl.addEventListener('click', handler, { once: true });
-    document.addEventListener('keydown', keyHandler, { once: true });
+
+    // Usar typewriter — click durante tipeo activa _skipTyping, que a su vez
+    // llama a setupDismiss gracias a _typeOnComplete
+    this._typeText(text, setupDismiss);
   }
 
   hide() {

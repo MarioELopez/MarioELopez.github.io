@@ -46,13 +46,18 @@ class GameEngine {
     // Flag para detener el engine al salir (evita listeners zombie)
     this._stopped = false;
 
+    // Timer para misiones cronometradas (L4)
+    this._timerTimeout  = null;
+    this._timerInterval = null;
+
     // Binding del input de la terminal
     this.terminal.onSubmit = cmd => this._onInput(cmd);
   }
 
   // ---- Persistencia en localStorage ----
 
-  static SAVE_KEY = 'sql_planta_progress';
+  static SAVE_KEY    = 'sql_planta_progress';
+  static BROKEN_KEY  = 'sql_planta_broken';
 
   _save() {
     try {
@@ -83,6 +88,18 @@ class GameEngine {
     try { localStorage.removeItem(GameEngine.SAVE_KEY); } catch (_) {}
   }
 
+  _setBroken() {
+    try { localStorage.setItem(GameEngine.BROKEN_KEY, '1'); } catch (_) {}
+  }
+
+  _clearBroken() {
+    try { localStorage.removeItem(GameEngine.BROKEN_KEY); } catch (_) {}
+  }
+
+  _isBroken() {
+    try { return !!localStorage.getItem(GameEngine.BROKEN_KEY); } catch (_) { return false; }
+  }
+
   // ---- Arranque ----
 
   async start() {
@@ -94,6 +111,13 @@ class GameEngine {
     try {
       // GameDB.init() carga los datos desde data.js (sin fetch, sin WebAssembly)
       GameDB.init();
+
+      // ── Comprobar estado de DB rota (easter egg DELETE sin WHERE) ──
+      const brokenFlag = this._isBroken();
+      if (brokenFlag) {
+        this._showBrokenState();
+        return;
+      }
 
       // Comprobar si hay progreso guardado
       const save = this._loadSave();
@@ -144,8 +168,8 @@ class GameEngine {
     this.terminal.print('');
     this.terminal.printInfo(`── Retomando: Nivel ${this.currentLevel}, misión ${this.currentMission + 1} ──`);
     this.terminal.print('');
-    const charMap = { 0: 'F1', 1: 'F2', 2: 'F2', 3: 'A1' };
-    this.character.setSprite(charMap[this.currentLevel] || 'F2');
+    const charMap = { 0: 'F1', 1: 'F1', 2: 'F1', 3: 'F1', 4: 'F1', 5: 'F2', 6: 'F2', 7: 'F2', 8: 'F2', 9: 'F2', 10: 'A1' };
+    this.character.setSprite(charMap[this.currentLevel] || 'F1');
     if (this.levelBadgeEl) this.levelBadgeEl.textContent = `NIVEL ${this.currentLevel}`;
     this._presentMission(this._currentMission());
   }
@@ -222,11 +246,11 @@ class GameEngine {
       return true;
     }
     if (lower === 'pista' || lower === 'ayuda' || lower === 'hint') {
-      this._printHint();
+      this._speakHint();
       return true;
     }
     if (lower === 'orden' || lower === 'objetivo' || lower === 'mision' || lower === 'misión') {
-      this._printOrden();
+      this._speakOrden();
       return true;
     }
     // Salir del juego y volver al portafolio
@@ -247,23 +271,44 @@ class GameEngine {
     this.terminal.lock('Procesando...');
     this.attempts++;
     this.totalAttempts++;
+    this._lastSQL = sql;
 
     // 1 — Analizar costo
     const analysis = QueryAnalyzer.analyze(sql);
 
-    // 2 — Iniciar simulación visual
+    // Detectar DELETE sin WHERE (easter egg)
+    const isDeleteNoWhere = analysis.warnings && analysis.warnings.includes('DELETE_NO_WHERE');
+
+    // 2 — Activar efecto de glitch durante la animación catastrófica
+    const gameEl = document.getElementById('game-container');
+    if (isDeleteNoWhere && gameEl) {
+      gameEl.classList.add('glitch-active');
+    }
+
+    // 3 — Iniciar simulación visual
     const simFn = analysis.isCatastrophic
       ? WeightSimulator.runCatastrophic.bind(WeightSimulator)
       : WeightSimulator.run.bind(WeightSimulator);
 
     simFn(analysis, this.simEl, () => {
-      // 3 — Ejecutar contra la DB real
+      // Quitar glitch al finalizar la animación
+      if (gameEl) gameEl.classList.remove('glitch-active');
+
+      // 4 — Easter egg: DELETE sin WHERE → estado roto permanente
+      if (isDeleteNoWhere) {
+        GameDB.execute(sql);  // ejecutar el DELETE de verdad
+        AchievementSystem.unlock('DELETE_WITHOUT_WHERE');
+        this._triggerBrokenState();
+        return;
+      }
+
+      // 5 — Ejecutar contra la DB real
       const execResult = GameDB.execute(sql);
 
-      // 4 — Mostrar resultado en terminal
+      // 6 — Mostrar resultado en terminal
       this._renderResult(sql, analysis, execResult);
 
-      // 5 — Validar contra la misión
+      // 7 — Validar contra la misión
       this._validateQuery(sql, analysis, execResult);
     });
   }
@@ -358,6 +403,7 @@ class GameEngine {
   // ---- Handlers de estado ----
 
   _onMissionSuccess(mission) {
+    this._clearMissionTimer();
     this._setState(GameEngine.STATES.MISSION_SUCCESS);
     this.score += Math.max(100 - (this.attempts - 1) * 15, 10);
     this._updateScoreUI();
@@ -445,15 +491,16 @@ class GameEngine {
 
     if (this.levelBadgeEl) this.levelBadgeEl.textContent = `NIVEL ${levelIndex}`;
 
-    // Cambiar personaje según el nivel
-    const charMap = { 0: 'F1', 1: 'F2', 2: 'F2', 3: 'A1' };
-    this.character.setSprite(charMap[levelIndex] || 'F2');
+    // Cambiar personaje según el nivel (0-4 = Neysa, 5-9 = Ing. Luis, 10+ = Dir. Morales)
+    const charMap = { 0: 'F1', 1: 'F1', 2: 'F1', 3: 'F1', 4: 'F1', 5: 'F2', 6: 'F2', 7: 'F2', 8: 'F2', 9: 'F2', 10: 'A1' };
+    this.character.setSprite(charMap[levelIndex] || 'F1');
 
     this._presentMission(this._currentMission());
   }
 
   _presentMission(mission) {
     if (!mission) { this._levelEnd(); return; }
+    this._clearMissionTimer();
     this._setState(GameEngine.STATES.DIALOG);
     this.attempts = 0;
     this.terminal.lock('Espera el diálogo...');
@@ -468,6 +515,11 @@ class GameEngine {
         this.terminal.unlock();
         this.terminal.print('');
         this.terminal.printInfo(`── Misión: ${mission.title} ──`);
+        if (mission.timed && mission.timeLimitMs) {
+          const secs = Math.floor(mission.timeLimitMs / 1000);
+          this.terminal.printInfo(`⏱ Tiempo límite: ${secs} segundos`);
+          this._startMissionTimer(mission.timeLimitMs);
+        }
         this.terminal.print('');
       }
     });
@@ -538,7 +590,9 @@ class GameEngine {
   }
 
   _restart() {
-    this._clearSave();  // borrar save al reiniciar
+    this._clearSave();
+    this._clearBroken();
+    this._clearMissionTimer();
     this.score          = 0;
     this.currentLevel   = 0;
     this.currentMission = 0;
@@ -594,7 +648,6 @@ class GameEngine {
     this.terminal.print('  status     Muestra estado actual de la misión', 'tline-info');
     this.terminal.print('  score      Muestra tu puntuación', 'tline-info');
     this.terminal.print('  logros     Muestra logros desbloqueados', 'tline-info');
-    this.terminal.print('  pista      Pide una pista a Neysa (nivel 0-1)', 'tline-info');
     this.terminal.print('  orden      Repite el objetivo de la misión actual', 'tline-info');
     this.terminal.print('  clear      Limpia la pantalla', 'tline-info');
     this.terminal.print('  salir      Volver al portafolio', 'tline-info');
@@ -607,94 +660,103 @@ class GameEngine {
     this.terminal.print('');
   }
 
-  _printOrden() {
+  // Repite la misión actual como diálogo del personaje
+  _speakOrden() {
     const mission = this._currentMission();
-    this.terminal.print('');
-    this.terminal.print('── Objetivo de la misión ──────────────────', 'tline-sep');
     if (!mission) {
-      this.terminal.print('  No hay misión activa en este momento.', 'tline-info');
-      this.terminal.print('');
+      this.character.react('No hay misión activa ahora mismo.', 'THINKING', 3000);
       return;
     }
-    this.terminal.print(`  ${mission.title}`, 'tline-ok');
-    this.terminal.print('');
     const intro = Array.isArray(mission.intro) ? mission.intro : [mission.intro];
-    intro.forEach(line => this.terminal.print(`  ${line}`, 'tline-info'));
-    this.terminal.print('──────────────────────────────────────────', 'tline-sep');
-    this.terminal.print('');
+    const lines = [`Misión: ${mission.title}`, ...intro];
+    this._speakIfReady(lines, 'STRICT');
   }
 
-  _printHint() {
+  // Da una pista como diálogo del personaje (no imprime en terminal)
+  _speakHint() {
     const mission = this._currentMission();
-    this.terminal.print('');
+    let lines = [];
 
-    // ── Nivel 0: Neysa — pistas completas ──────────────────────
+    // ── Nivel 0: Neysa — pistas completas (inducción) ─────────
     if (this.currentLevel === 0) {
       const hints = {
         'L0M1': [
-          '[ Neysa ] ¡Dale, sin pena! Escribe exactamente esto:',
-          '  SHOW TABLES;',
-          '',
-          'Eso le pregunta al sistema qué tablas existen. Simple.',
+          'Sin pena, prueba esto:',
+          'SHOW TABLES;',
+          'Le pregunta al sistema qué tablas existen. Así de simple.',
         ],
         'L0M2': [
-          '[ Neysa ] Fácil, usa DESCRIBE así:',
-          '  DESCRIBE empleados;',
-          '',
-          'También puedes abreviar con  DESC empleados;  — ambos funcionan.',
+          'Usa DESCRIBE empleados;',
+          'También vale DESC empleados; — los dos hacen lo mismo.',
         ],
         'L0M3': [
-          '[ Neysa ] Usa SELECT con LIMIT para no traer todo:',
-          '  SELECT * FROM produccion_diaria LIMIT 5;',
-          '',
-          'El número después de LIMIT controla cuántas filas ves. Con 5 ó 10 es suficiente.',
+          'SELECT * FROM produccion_diaria LIMIT 5;',
+          'El número después de LIMIT controla cuántas filas ves.',
         ],
       };
-      const h = hints[mission ? mission.id : ''] || ['[ Neysa ] Hmm, no tengo pista para esta misión. Pero confío en ti!'];
-      h.forEach(l => this.terminal.print(l, l.startsWith('  ') ? 'tline-ok' : 'tline-warn'));
+      lines = hints[mission ? mission.id : ''] || ['No tengo pista para esto. ¡Confío en ti!'];
 
-    // ── Nivel 1: Jefe de Planta — pistas parciales ────────────────────────────
+    // ── Nivel 1: Neysa — pistas parciales ─────────────────────
     } else if (this.currentLevel === 1) {
       const hints = {
-        'L1M1': [
-          '[ Ing. Luis ] *suspira* Solo por esta vez...',
-          '  Estructura: SELECT nombre, cargo FROM empleados WHERE activo = 1;',
-          '',
-          'La próxima, lo resuelves tú.',
-        ],
-        'L1M2': [
-          '[ Ing. Luis ] Te doy solo la idea:',
-          '  Usa WHERE con la columna "turno" y filtra por \'noche\'.',
-          '  No olvides filtrar también por activo = 1.',
-        ],
-        'L1M3': [
-          '[ Ing. Luis ] Una sola pista:',
-          '  COUNT(*) en tabla paradas, con WHERE tipo_parada = \'falla\'.',
-        ],
-        'L1M4': [
-          '[ Ing. Luis ] Te lo digo una sola vez:',
-          '  ORDER BY eficiencia_porcentaje ASC, tabla produccion_diaria o lineas_produccion.',
-        ],
-        'L1M5': [
-          '[ Ing. Luis ] JOIN. Eso es todo lo que te digo.',
-          '  Tabla paradas + tabla maquinas, usando maquina_id como llave.',
-        ],
+        'L1M1': ['Solo por esta vez:', 'SELECT nombre, cargo FROM empleados WHERE activo = 1;', 'La próxima lo resuelves tú.'],
+        'L1M2': ['Filtra por la columna turno con valor \'noche\'.', 'Y que activo = 1.'],
+        'L1M3': ['SELECT COUNT(*) FROM paradas...', 'WHERE tipo_parada = \'falla\'. Eso es todo.'],
+        'L1M4': ['ORDER BY eficiencia_porcentaje ASC.', 'Tabla produccion_diaria.'],
+        'L1M5': ['JOIN maquinas ON paradas.maquina_id = maquinas.id', 'Trae el nombre de la máquina.'],
       };
-      const h = hints[mission ? mission.id : ''] || ['[ Ing. Luis ] No tengo pistas para esta misión. Piensa.'];
-      h.forEach(l => this.terminal.print(l, l.startsWith('  ') ? 'tline-warn' : 'tline-info'));
+      lines = hints[mission ? mission.id : ''] || ['No tengo pista para eso. Piénsalo un poco más.'];
 
-    // ── Nivel 2+: Sin pistas ──────────────────────────────────────────────────
+    // ── Nivel 2: Neysa — pistas muy escuetas ──────────────────
     } else if (this.currentLevel === 2) {
-      this.terminal.print('[ Ing. Luis ] ¿Me estás pidiendo una pista? Para eso no te contrataron.', 'tline-err');
-      this.terminal.print('         Revisa la misión y piensa antes de ejecutar.', 'tline-info');
-      this.character.react('¿Una pista? Serio?', 'STRICT', 3000);
+      const hints = {
+        'L2M1': ['GROUP BY linea_id con AVG(unidades_defectuosas).'],
+        'L2M2': ['SUM(horas_perdidas) GROUP BY tipo_parada.'],
+        'L2M3': ['JOIN con AVG(unidades_producidas) / capacidad_maxima_diaria.'],
+        'L2M4': ['GROUP BY maquina_id HAVING COUNT(*) > 2.'],
+        'L2M5': ['WHERE salario > (SELECT AVG(salario) FROM empleados)'],
+      };
+      lines = hints[mission ? mission.id : ''] || ['Piensa en el objetivo y en las tablas involucradas.'];
+
+    // ── Nivel 3: Neysa — seria, sin lujos ─────────────────────
+    } else if (this.currentLevel === 3) {
+      const hints = {
+        'L3M1': ['INSERT INTO paradas (maquina_id, tipo_parada, fecha_inicio, ...) VALUES (...)'],
+        'L3M2': ['UPDATE maquinas SET estado = \'mantenimiento\' WHERE id = 7'],
+        'L3M3': ['UPDATE empleados SET salario = salario * 1.05 WHERE cargo LIKE \'%tecnico%\''],
+        'L3M4': ['DELETE FROM produccion_diaria WHERE fecha < \'2020-01-01\'', '¡No olvides el WHERE!'],
+        'L3M5': ['SELECT COUNT(*) FROM produccion_diaria WHERE fecha < \'2020-01-01\''],
+      };
+      lines = hints[mission ? mission.id : ''] || ['Revisa la misión. Piensa dos veces antes de ejecutar.'];
+
+    // ── Nivel 4: sin pistas — ya deberías poder solo ──────────
     } else {
-      this.terminal.print('[ Gerencia ] Aquí no damos pistas.', 'tline-err');
-      this.terminal.print('             Si llegaste hasta aquí, debes saber lo que haces.', 'tline-info');
-      this.character.react('No hay pistas en este nivel.', 'STRICT', 3000);
+      lines = [
+        'Aquí no hay pistas.',
+        'Si llegaste al nivel 4 es porque ya sé que puedes resolverlo solo.',
+      ];
     }
 
-    this.terminal.print('');
+    this._speakIfReady(lines, 'THINKING');
+  }
+
+  // Habla por el personaje si el juego está en espera de input;
+  // si no, usa react() breve para no interrumpir un diálogo en curso.
+  _speakIfReady(lines, stateKey = 'TALKING') {
+    if (this.state === GameEngine.STATES.WAITING_INPUT) {
+      this._setState(GameEngine.STATES.DIALOG);
+      this.terminal.lock('Escucha...');
+      this.character.speak(lines, {
+        state: stateKey,
+        onEnd: () => {
+          this._setState(GameEngine.STATES.WAITING_INPUT);
+          this.terminal.unlock();
+        },
+      });
+    } else {
+      // El personaje ya está hablando — reacción rápida sin interrumpir
+      this.character.react(lines[0] || '...', stateKey, 3500);
+    }
   }
 
   _printStatus() {
@@ -728,5 +790,109 @@ class GameEngine {
       });
     }
     this.terminal.print('');
+  }
+
+  // ---- Timer para misiones cronometradas ----
+
+  _startMissionTimer(ms) {
+    this._clearMissionTimer();
+    let remaining = Math.floor(ms / 1000);
+
+    // Avisos intermedios de Neysa
+    this._timerInterval = setInterval(() => {
+      remaining -= 15;
+      if (remaining <= 0) return;
+      if (this.state !== GameEngine.STATES.WAITING_INPUT) return;
+      if (remaining <= 30) {
+        this.character.react(`¡${remaining} segundos! ¡MUÉVETE!`, 'PANIC', 3000);
+      } else if (remaining <= 60) {
+        this.character.react(`¡Quedan ${remaining} segundos!`, 'ANGRY', 2500);
+      }
+    }, 15000);
+
+    // Timeout final
+    this._timerTimeout = setTimeout(() => {
+      this._clearMissionTimer();
+      this._onTimerExpired();
+    }, ms);
+  }
+
+  _clearMissionTimer() {
+    if (this._timerTimeout)  { clearTimeout(this._timerTimeout);   this._timerTimeout  = null; }
+    if (this._timerInterval) { clearInterval(this._timerInterval); this._timerInterval = null; }
+  }
+
+  _onTimerExpired() {
+    if (this.state !== GameEngine.STATES.WAITING_INPUT) return;
+    this.terminal.printError('⏱ ¡TIEMPO AGOTADO!');
+    this.score = Math.max(0, this.score - 30);
+    this._updateScoreUI();
+    this._save();
+    this._speakIfReady([
+      '¡Se acabó el tiempo! El turno no espera.',
+      'Pierdes 30 puntos y pasamos a la siguiente misión. La próxima muévete más rápido.',
+    ], 'PANIC');
+    setTimeout(() => {
+      if (this.state !== GameEngine.STATES.WAITING_INPUT &&
+          this.state !== GameEngine.STATES.DIALOG) return;
+      this._advanceMission();
+    }, 6000);
+  }
+
+  // ---- Easter egg: DB rota por DELETE sin WHERE ----
+
+  _triggerBrokenState() {
+    this._clearMissionTimer();
+    this._setBroken();
+    this._setState(GameEngine.STATES.GAME_OVER);
+
+    this.terminal.print('');
+    this.terminal.printError('⚠ OPERACIÓN IRREVERSIBLE — BASE DE DATOS DESTRUIDA');
+    this.terminal.print('');
+
+    this.character.panic(
+      '¿¡¿Qué acabas de hacer?!\n\nUn DELETE sin WHERE. Sin filtro. Sin confirmación.\n\nBorraste toda la tabla. No hay respaldo aquí. La base de datos de la planta está destruida.\n\nEl sistema no puede continuar. Tu única opción es escribir  restart  para reinicializar todo desde cero.',
+      () => {
+        this.terminal.printError('Sistema bloqueado. Escribe  restart  para recuperar la base de datos.');
+        this.terminal.unlock('Escribe restart para recuperar...');
+        this.terminal.onSubmit = cmd => {
+          if (cmd.toLowerCase().trim() === 'restart') {
+            this.terminal.printCommand(cmd);
+            this.terminal.onSubmit = c => this._onInput(c);
+            this._restart();
+          }
+        };
+      }
+    );
+  }
+
+  _showBrokenState() {
+    this._setState(GameEngine.STATES.GAME_OVER);
+    const gameEl = document.getElementById('game-container');
+
+    // Activar glitch brevemente
+    if (gameEl) gameEl.classList.add('glitch-active');
+    setTimeout(() => { if (gameEl) gameEl.classList.remove('glitch-active'); }, 2500);
+
+    this.terminal.printError('⚠ ERROR CRÍTICO: BASE DE DATOS CORROMPIDA');
+    this.terminal.print('El sistema detectó una destrucción masiva de datos en la sesión anterior.', 'tline-info');
+    this.terminal.print('');
+
+    setTimeout(() => {
+      this.character.panic(
+        '¡Sabía que ibas a hacer eso!\n\nBorraste toda la tabla sin WHERE. Sin pensar en las consecuencias.\n\nEl sistema está roto. Tienes que reiniciarlo todo para recuperar la base de datos.\n\nEscribe  restart  cuando estés listo para aceptar las consecuencias.',
+        () => {
+          this.terminal.printInfo('Escribe  restart  para reinicializar la base de datos.');
+          this.terminal.unlock('Escribe restart...');
+          this.terminal.onSubmit = cmd => {
+            if (cmd.toLowerCase().trim() === 'restart') {
+              this.terminal.printCommand(cmd);
+              this.terminal.onSubmit = c => this._onInput(c);
+              this._restart();
+            }
+          };
+        }
+      );
+    }, 2800);
   }
 }
