@@ -1,16 +1,16 @@
 {
-  "actualizado": "2026-04-15T02:27:27.031860+00:00",
-  "km_anio": 57.0,
-  "km_alltime": 1915.9,
+  "actualizado": "2026-04-15T05:23:02.021082+00:00",
+  "km_anio": 71.2,
+  "km_alltime": 1930.1,
   "pr_distancia": 66.5,
   "pr_velocidad": 23.5,
   "ultima": {
-    "nombre": "JUEVES SANTO",
-    "distancia": 6.2,
-    "tiempo": 5240,
-    "fecha": "2026-04-02",
-    "velocidad": 4.3
+    "nombre": "Cambodromo para cenar",
+    "distancia": 14.2,
+    "tiempo": 3953,
+    "fecha": "2026-04-14",
+    "velocidad": 13.0
   },
-  "modo": "pr",
-  "display": "🏆 66.5 km · ⚡ 23.5 km/h"
+  "modo": "anual",
+  "display": "71.2 km este año"
 }
