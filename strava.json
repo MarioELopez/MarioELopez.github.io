@@ -1,7 +1,7 @@
 {
-  "actualizado": "2026-04-19T20:36:47.394410+00:00",
-  "km_anio": 123.1,
-  "km_alltime": 1982.0,
+  "actualizado": "2026-04-19T21:34:58.187147+00:00",
+  "km_anio": 170.2,
+  "km_alltime": 2029.1,
   "pr_distancia": 66.5,
   "pr_velocidad": 23.5,
   "ultima": {
@@ -12,5 +12,5 @@
     "velocidad": 11.5
   },
   "modo": "anual",
-  "display": "123.1 km este año"
+  "display": "170.2 km este año"
 }
