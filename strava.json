@@ -1,16 +1,16 @@
 {
-  "actualizado": "2026-04-19T17:34:32.848160+00:00",
-  "km_anio": 71.2,
-  "km_alltime": 1930.1,
+  "actualizado": "2026-04-19T18:50:09.846109+00:00",
+  "km_anio": 123.1,
+  "km_alltime": 1982.0,
   "pr_distancia": 66.5,
   "pr_velocidad": 23.5,
   "ultima": {
-    "nombre": "Cambodromo para cenar",
-    "distancia": 14.2,
-    "tiempo": 3953,
-    "fecha": "2026-04-14",
-    "velocidad": 13.0
+    "nombre": "Sendero del Duende",
+    "distancia": 51.9,
+    "tiempo": 16261,
+    "fecha": "2026-04-19",
+    "velocidad": 11.5
   },
   "modo": "anual",
-  "display": "71.2 km este año"
+  "display": "123.1 km este año"
 }
