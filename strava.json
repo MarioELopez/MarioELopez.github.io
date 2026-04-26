@@ -1,16 +1,16 @@
 {
-  "actualizado": "2026-04-26T15:40:24.828834+00:00",
-  "km_anio": 170.2,
-  "km_alltime": 2029.1,
+  "actualizado": "2026-04-26T16:41:00.352337+00:00",
+  "km_anio": 212.0,
+  "km_alltime": 2070.9,
   "pr_distancia": 66.5,
   "pr_velocidad": 23.5,
   "ultima": {
-    "nombre": "Sendero del Duende",
-    "distancia": 51.9,
-    "tiempo": 16261,
-    "fecha": "2026-04-19",
-    "velocidad": 11.5
+    "nombre": "Queríamos un reto y nos tocó",
+    "distancia": 41.8,
+    "tiempo": 12474,
+    "fecha": "2026-04-26",
+    "velocidad": 12.1
   },
   "modo": "anual",
-  "display": "170.2 km este año"
+  "display": "212.0 km este año"
 }
