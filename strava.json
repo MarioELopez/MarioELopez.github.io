@@ -1,16 +1,16 @@
 {
-  "actualizado": "2026-06-07T12:19:42.484791+00:00",
-  "km_anio": 212.0,
-  "km_alltime": 2070.9,
+  "actualizado": "2026-06-07T14:50:51.831100+00:00",
+  "km_anio": 231.1,
+  "km_alltime": 2090.0,
   "pr_distancia": 66.5,
   "pr_velocidad": 23.5,
   "ultima": {
-    "nombre": "Queríamos un reto y nos tocó",
-    "distancia": 41.8,
-    "tiempo": 12474,
-    "fecha": "2026-04-26",
-    "velocidad": 12.1
+    "nombre": "Recuperando el ritmo",
+    "distancia": 19.1,
+    "tiempo": 6057,
+    "fecha": "2026-06-07",
+    "velocidad": 11.4
   },
   "modo": "anual",
-  "display": "212.0 km este año"
+  "display": "231.1 km este año"
 }
