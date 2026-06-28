@@ -1,16 +1,16 @@
 {
-  "actualizado": "2026-06-28T12:15:26.028062+00:00",
-  "km_anio": 251.0,
-  "km_alltime": 2109.9,
+  "actualizado": "2026-06-28T14:47:19.838044+00:00",
+  "km_anio": 286.6,
+  "km_alltime": 2145.5,
   "pr_distancia": 66.5,
   "pr_velocidad": 23.5,
   "ultima": {
-    "nombre": "Primer día de Estado de Excepción",
-    "distancia": 19.9,
-    "tiempo": 6495,
-    "fecha": "2026-06-20",
-    "velocidad": 11.0
+    "nombre": "CHUCHIO🚂 🚃 🚃 pero con viento 💨 💨",
+    "distancia": 35.6,
+    "tiempo": 11187,
+    "fecha": "2026-06-28",
+    "velocidad": 11.5
   },
   "modo": "anual",
-  "display": "251.0 km este año"
+  "display": "286.6 km este año"
 }
